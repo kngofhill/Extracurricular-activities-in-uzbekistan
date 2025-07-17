@@ -1,142 +1,130 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Extracurriculars Uzbekistan</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f9f9f9;
       margin: 0;
-      padding: 20px;
-    }
-    h1, h2 {
-      text-align: center;
+      padding: 0;
+      background-color: #f9f9f9;
       color: #333;
     }
-    form, .search-section, .results {
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 20px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    header {
+      background-color: #4f46e5;
+      color: white;
+      padding: 1rem;
+      text-align: center;
     }
-    input, textarea, select, button {
+    main {
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1, h2 {
+      color: #111827;
+    }
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+    }
+    input, button, textarea {
       width: 100%;
-      padding: 10px;
-      margin: 10px 0;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
       border: 1px solid #ccc;
-      border-radius: 5px;
+      border-radius: 0.25rem;
     }
     button {
-      background-color: #007BFF;
+      background-color: #4f46e5;
       color: white;
       cursor: pointer;
-      border: none;
     }
     button:hover {
-      background-color: #0056b3;
-    }
-    .project {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
+      background-color: #3730a3;
     }
   </style>
 </head>
 <body>
-  <h1>Extracurriculars Uzbekistan</h1>
-  <h2>Post a Project</h2>
-  <form id="projectForm">
-    <input id="title" placeholder="Title" required />
-    <textarea id="description" placeholder="Description" required></textarea>
-    <input id="location" placeholder="Location (e.g., Andijan)" required />
-    <select id="type" required>
-      <option value="">Select EC Type</option>
-      <option value="volunteering">Volunteering</option>
-      <option value="competition">Competition</option>
-      <option value="research">Research</option>
-      <option value="startup">Startup</option>
-      <option value="other">Other</option>
-    </select>
-    <button type="submit">Submit Project</button>
-  </form>
-
-  <div class="search-section">
-    <h2>Find a Project</h2>
-    <input id="searchLocation" placeholder="Enter location (e.g., Andijan)" />
-    <select id="searchType">
-      <option value="">Select EC Type</option>
-      <option value="volunteering">Volunteering</option>
-      <option value="competition">Competition</option>
-      <option value="research">Research</option>
-      <option value="startup">Startup</option>
-      <option value="other">Other</option>
-    </select>
-    <button onclick="searchProjects()">Search</button>
+  <header>
+    <h1>Extracurriculars Uzbekistan</h1>
+    <p>Post and Discover ECs and Internships</p>
+  </header>  <main>
+    <div id="auth">
+      <h2>Login or Register</h2>
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button onclick="register()">Register</button>
+      <button onclick="login()">Login</button>
+      <button onclick="logout()">Logout</button>
+    </div><div id="dashboard" style="display:none;">
+  <h2>Welcome, <span id="user-email"></span></h2>
+  <div class="card">
+    <h3>Post an Opportunity</h3>
+    <input id="title" placeholder="Title" />
+    <textarea id="description" placeholder="Description"></textarea>
+    <input id="link" placeholder="Link (optional)" />
+    <button onclick="postOpportunity()">Post</button>
   </div>
 
-  <div id="results" class="results"></div>
+  <div class="card">
+    <h3>Opportunities</h3>
+    <div id="opportunities"></div>
+  </div>
+</div>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  <script>
+  </main>  <!-- Firebase -->  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>  <script>
     const firebaseConfig = {
-      databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com/",
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
 
-    const form = document.getElementById('projectForm');
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const title = document.getElementById('title').value;
-      const description = document.getElementById('description').value;
-      const location = document.getElementById('location').value;
-      const type = document.getElementById('type').value;
-      const newProject = {
-        title,
-        description,
-        location,
-        type,
-        timestamp: Date.now()
-      };
-      db.ref('projects').push(newProject);
-      form.reset();
-      alert("Project submitted!");
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    function register() {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => alert("Registered!"))
+        .catch(e => alert(e.message));
+    }
+
+    function login() {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => alert("Logged in!"))
+        .catch(e => alert(e.message));
+    }
+
+    function logout() {
+      auth.signOut();
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        userEmailSpan.textContent = user.email;
+        authDiv.style.display = 'none';
+        dashboard.style.display = 'block';
+        loadOpportunities();
+      } else {
+        dashboard.style.display = 'none';
+        authDiv.style.display = 'block';
+      }
     });
 
-    function searchProjects() {
-      const loc = document.getElementById('searchLocation').value.toLowerCase();
-      const type = document.getElementById('searchType').value.toLowerCase();
-      const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = '<p>Loading...</p>';
-
-      db.ref('projects').once('value', (snapshot) => {
-        const projects = snapshot.val();
-        let output = '';
-        for (let id in projects) {
-          const p = projects[id];
-          if (
-            (!loc || p.location.toLowerCase().includes(loc)) &&
-            (!type || p.type.toLowerCase() === type)
-          ) {
-            output += `
-              <div class="project">
-                <h3>${p.title}</h3>
-                <p><strong>Description:</strong> ${p.description}</p>
-                <p><strong>Location:</strong> ${p.location}</p>
-                <p><strong>Type:</strong> ${p.type}</p>
-              </div>
-            `;
-          }
-        }
-        resultsDiv.innerHTML = output || '<p>No matching projects found.</p>';
-      });
-    }
-  </script>
-</body>
-</html>
+    function postOpportunity() {
+      const user = auth.currentUser;
+      if (!user) return;
+      const title = document.getElementById("title").value;
 
