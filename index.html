@@ -184,9 +184,18 @@
       <h3>Post New Project</h3>
       <form id="postForm">
         <input name="title" placeholder="Project Title" required />
-        <select id="city" name="city" required></select>
-        <select id="type" name="type" required></select>
-        <select id="theme" name="theme" required></select>
+        <select id="city" name="city" required>
+          <option disabled selected>Select city</option>
+        </select>
+        
+        <select id="type" name="type" required>
+          <option disabled selected>Select EC type</option>
+        </select>
+        
+        <select id="theme" name="theme" required>
+          <option disabled selected>Select project theme</option>
+        </select>
+
         <input name="contact" placeholder="Phone / Email / Telegram" required />
         <textarea name="desc" placeholder="Description" required></textarea>
         <button type="submit">Post Project</button>
