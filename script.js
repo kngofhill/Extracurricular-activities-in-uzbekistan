@@ -1,33 +1,45 @@
-let posts = [
-  {
-    title: "Web Dev Internship",
-    description: "React internship at a startup.",
-    tags: ["react", "frontend"]
-  },
-  {
-    title: "Math Tutoring EC",
-    description: "Volunteer as a peer tutor.",
-    tags: ["math", "tutoring"]
-  }
-];
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-function renderPosts(filter = "") {
-  const postList = document.getElementById("postList");
-  postList.innerHTML = "";
+const firebaseConfig = {
+  apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
+  authDomain: "extracurricularsuzbekistan.firebaseapp.com",
+  databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com",
+  projectId: "extracurricularsuzbekistan",
+  storageBucket: "extracurricularsuzbekistan.firebasestorage.app",
+  messagingSenderId: "555521664728",
+  appId: "1:555521664728:web:bf72cb8384be98ff7b99ad",
+  measurementId: "G-Z53076ZBCJ"
+};
 
-  const filtered = posts.filter(p =>
-    p.title.toLowerCase().includes(filter) ||
-    p.description.toLowerCase().includes(filter) ||
-    p.tags.join(" ").toLowerCase().includes(filter)
-  );
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
 
-  if (filtered.length === 0) {
-    postList.innerHTML = "<p>No matching opportunities found.</p>";
-  } else {
-    filtered.forEach(p => {
-      const div = document.createElement("div");
-      div.className = "post";
-      div.innerHTML = `
-        <h3>${p.title}</h3>
-        <p>${p.description}</p>
-        <small>Tags: ${p.tags.join(", ")}</small>
+const form = document.getElementById('activityForm');
+const activitiesDiv = document.getElementById('activities');
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const title = document.getElementById('title').value;
+  const description = document.getElementById('description').value;
+
+  push(ref(database, 'activities'), {
+    title,
+    description,
+    timestamp: Date.now()
+  });
+
+  form.reset();
+});
+
+onValue(ref(database, 'activities'), (snapshot) => {
+  activitiesDiv.innerHTML = '';
+  snapshot.forEach(childSnapshot => {
+    const activity = childSnapshot.val();
+    const div = document.createElement('div');
+    div.className = 'activity';
+    div.innerHTML = <h3>${activity.title}</h3><p>${activity.description}</p>;
+    activitiesDiv.appendChild(div);
+  });
+});
