@@ -6,7 +6,7 @@ const firebaseConfig = {
   authDomain: "extracurricularsuzbekistan.firebaseapp.com",
   databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com",
   projectId: "extracurricularsuzbekistan",
-  storageBucket: "extracurricularsuzbekistan.firebasestorage.app",
+  storageBucket: "extracurricularsuzbekistan.appspot.com",
   messagingSenderId: "555521664728",
   appId: "1:555521664728:web:bf72cb8384be98ff7b99ad",
   measurementId: "G-Z53076ZBCJ"
