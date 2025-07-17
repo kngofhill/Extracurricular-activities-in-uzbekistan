@@ -180,7 +180,7 @@
               project.theme.toLowerCase().includes(query)
             ) {
               const div = document.createElement('div');
-              div.textContent = ${project.title} | ${project.location} | ${project.type} | ${project.theme};
+              div.textContent = `${project.title} | ${project.location} | ${project.type} | ${project.theme}`;
               resultsDiv.appendChild(div);
             }
           }
@@ -190,3 +190,4 @@
   </script>
 </body>
 </html>
+
