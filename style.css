@@ -1,41 +1,42 @@
+
+style.css
+
 body {
   font-family: Arial, sans-serif;
-  background: #f5f5f5;
   padding: 20px;
+  background-color: #f0f0f0;
 }
 
-.container {
-  max-width: 600px;
-  margin: auto;
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+form {
+  margin-bottom: 20px;
 }
 
-input {
-  width: 100%;
+input, textarea {
+  display: block;
+  margin-bottom: 10px;
   padding: 10px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  width: 100%;
+  max-width: 400px;
+  font-size: 16px;
 }
 
 button {
   padding: 10px 20px;
-  background: royalblue;
+  font-size: 16px;
+  background-color: #007BFF;
   color: white;
   border: none;
-  border-radius: 6px;
   cursor: pointer;
 }
 
 button:hover {
-  background: navy;
+  background-color: #0056b3;
 }
 
-.post {
-  margin-top: 20px;
-  border-bottom: 1px solid #ddd;
-  padding: 10px 0;
+.activity {
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  max-width: 400px;
 }
