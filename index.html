@@ -65,21 +65,75 @@
       <option value="Tashkent">Tashkent</option>
       <option value="Andijan">Andijan</option>
       <option value="Fergana">Fergana</option>
+      <option value="Samarkand">Samarkand</option>
+      <option value="Bukhara">Bukhara</option>
+      <option value="Navoi">Navoi</option>
+      <option value="Namangan">Namangan</option>
+      <option value="Khorezm">Khorezm</option>
+      <option value="Karakalpakstan">Karakalpakstan</option>
+      <option value="Kashkadarya">Kashkadarya</option>
+      <option value="Surkhandarya">Surkhandarya</option>
+      <option value="Sirdarya">Sirdarya</option>
+      <option value="Jizzakh">Jizzakh</option>
     </select>
     <select id="project-type">
       <option value="">Type of EC</option>
       <option value="Volunteering">Volunteering</option>
+      <option value="Afterschool Club">Afterschool Club</option>
+      <option value="Outdoor Activity">Outdoor Activity</option>
+      <option value="Workshop">Workshop</option>
       <option value="Research">Research</option>
       <option value="Internship">Internship</option>
     </select>
     <select id="project-theme">
       <option value="">Theme of EC</option>
+      <option value="Computer Science">Computer Science</option>
+      <option value="Psychology">Psychology</option>
+      <option value="Math">Math</option>
       <option value="Environment">Environment</option>
-      <option value="Education">Education</option>
-      <option value="Technology">Technology</option>
+      <option value="Art">Art</option>
+      <option value="Business">Business</option>
+      <option value="Literature">Literature</option>
     </select>
+    <input type="text" id="contact-info" placeholder="Contact (Email, Phone or Telegram)">
     <button id="post-project">Post Project</button>
-    <input type="text" id="search-query" placeholder="Search projects">
+
+    <h3>Search Projects</h3>
+    <select id="search-location">
+      <option value="">Any Location</option>
+      <option value="Tashkent">Tashkent</option>
+      <option value="Andijan">Andijan</option>
+      <option value="Fergana">Fergana</option>
+      <option value="Samarkand">Samarkand</option>
+      <option value="Bukhara">Bukhara</option>
+      <option value="Navoi">Navoi</option>
+      <option value="Namangan">Namangan</option>
+      <option value="Khorezm">Khorezm</option>
+      <option value="Karakalpakstan">Karakalpakstan</option>
+      <option value="Kashkadarya">Kashkadarya</option>
+      <option value="Surkhandarya">Surkhandarya</option>
+      <option value="Sirdarya">Sirdarya</option>
+      <option value="Jizzakh">Jizzakh</option>
+    </select>
+    <select id="search-type">
+      <option value="">Any Type</option>
+      <option value="Volunteering">Volunteering</option>
+      <option value="Afterschool Club">Afterschool Club</option>
+      <option value="Outdoor Activity">Outdoor Activity</option>
+      <option value="Workshop">Workshop</option>
+      <option value="Research">Research</option>
+      <option value="Internship">Internship</option>
+    </select>
+    <select id="search-theme">
+      <option value="">Any Theme</option>
+      <option value="Computer Science">Computer Science</option>
+      <option value="Psychology">Psychology</option>
+      <option value="Math">Math</option>
+      <option value="Environment">Environment</option>
+      <option value="Art">Art</option>
+      <option value="Business">Business</option>
+      <option value="Literature">Literature</option>
+    </select>
     <button id="search-button">Search</button>
     <div id="search-results"></div>
   </div>
@@ -114,21 +168,13 @@
       const email = emailInput.value;
       const password = passwordInput.value;
 
-      if (isLogin) {
-        auth.signInWithEmailAndPassword(email, password)
-          .then(() => {
-            authContainer.classList.add('hidden');
-            mainContainer.classList.remove('hidden');
-          })
-          .catch(error => alert(error.message));
-      } else {
-        auth.createUserWithEmailAndPassword(email, password)
-          .then(() => {
-            authContainer.classList.add('hidden');
-            mainContainer.classList.remove('hidden');
-          })
-          .catch(error => alert(error.message));
-      }
+      const handler = isLogin ? auth.signInWithEmailAndPassword : auth.createUserWithEmailAndPassword;
+      handler(email, password)
+        .then(() => {
+          authContainer.classList.add('hidden');
+          mainContainer.classList.remove('hidden');
+        })
+        .catch(error => alert("Error: " + error.message));
     });
 
     toggleForm.addEventListener('click', () => {
@@ -143,8 +189,9 @@
       const location = document.getElementById('project-location').value;
       const type = document.getElementById('project-type').value;
       const theme = document.getElementById('project-theme').value;
+      const contact = document.getElementById('contact-info').value;
 
-      if (!title || !location || !type || !theme) {
+      if (!title || !location || !type || !theme || !contact) {
         alert("Please fill all fields");
         return;
       }
@@ -154,6 +201,7 @@
         location,
         type,
         theme,
+        contact,
         timestamp: Date.now()
       };
 
@@ -163,7 +211,9 @@
     });
 
     document.getElementById('search-button').addEventListener('click', () => {
-      const query = document.getElementById('search-query').value.toLowerCase();
+      const location = document.getElementById('search-location').value;
+      const type = document.getElementById('search-type').value;
+      const theme = document.getElementById('search-theme').value;
       const resultsDiv = document.getElementById('search-results');
       resultsDiv.innerHTML = "Searching...";
 
@@ -172,21 +222,19 @@
           const projects = snapshot.val();
           resultsDiv.innerHTML = "";
           for (let key in projects) {
-            const project = projects[key];
-            if (
-              project.title.toLowerCase().includes(query) ||
-              project.location.toLowerCase().includes(query) ||
-              project.type.toLowerCase().includes(query) ||
-              project.theme.toLowerCase().includes(query)
-            ) {
+            const p = projects[key];
+            if ((location === '' || p.location === location) &&
+                (type === '' || p.type === type) &&
+                (theme === '' || p.theme === theme)) {
               const div = document.createElement('div');
-              div.textContent = `${project.title} | ${project.location} | ${project.type} | ${project.theme}`;
+              div.textContent = `${p.title} | ${p.location} | ${p.type} | ${p.theme} | Contact: ${p.contact}`;
               resultsDiv.appendChild(div);
             }
           }
-          if (resultsDiv.innerHTML === "") resultsDiv.innerHTML = "No results found.";
+          if (!resultsDiv.innerHTML) resultsDiv.innerHTML = "No results found.";
         });
     });
   </script>
 </body>
 </html>
+
