@@ -3,203 +3,190 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EC Portal</title>
+  <title>EC Uzbekistan</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      padding: 20px;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      min-height: 100vh;
     }
     .container {
-      max-width: 600px;
-      margin: auto;
       background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 400px;
+      margin-top: 2rem;
     }
-    h2 { text-align: center; }
-    .hidden { display: none; }
-    input, select, button {
-      display: block;
+    input, button, select {
       width: 100%;
-      margin: 10px 0;
       padding: 10px;
-      font-size: 16px;
+      margin-top: 10px;
     }
-    #logoutBtn { background: red; color: white; }
-    #message { color: red; text-align: center; }
-    #projectList { margin-top: 20px; }
-    .project {
-      background: #e7f5ff;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 6px;
+    h2 {
+      text-align: center;
+    }
+    .toggle {
+      margin-top: 1rem;
+      text-align: center;
+      cursor: pointer;
+      color: blue;
+      text-decoration: underline;
+    }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>EC Portal</h2>
-
-    <div id="authSection">
-      <h3>Register</h3>
-      <input type="email" id="registerEmail" placeholder="Email">
-      <input type="password" id="registerPassword" placeholder="Password">
-      <button onclick="register()">Register</button>
-
-      <h3>Login</h3>
-      <input type="email" id="loginEmail" placeholder="Email">
-      <input type="password" id="loginPassword" placeholder="Password">
-      <button onclick="login()">Login</button>
-      <p id="message"></p>
-    </div>
-
-    <div id="appSection" class="hidden">
-      <button id="logoutBtn" onclick="logout()">Logout</button>
-
-      <h3>Post an EC Project</h3>
-      <select id="location">
-        <option value="">Select City</option>
-        <option value="Tashkent">Tashkent</option>
-        <option value="Andijan">Andijan</option>
-        <option value="Namangan">Namangan</option>
-        <option value="Fergana">Fergana</option>
-        <option value="Bukhara">Bukhara</option>
-        <option value="Samarkand">Samarkand</option>
-        <option value="Navoi">Navoi</option>
-        <option value="Kokand">Kokand</option>
-        <option value="Urgench">Urgench</option>
-        <option value="Nukus">Nukus</option>
-      </select>
-      <select id="type">
-        <option value="">Select Type</option>
-        <option value="Volunteering">Volunteering</option>
-        <option value="Afterschool Club">Afterschool Club</option>
-        <option value="Outdoor Activity">Outdoor Activity</option>
-        <option value="Research">Research</option>
-        <option value="Startup">Startup</option>
-      </select>
-      <select id="theme">
-        <option value="">Select Theme</option>
-        <option value="Computer Science">Computer Science</option>
-        <option value="Psychology">Psychology</option>
-        <option value="Art">Art</option>
-        <option value="Business">Business</option>
-        <option value="Biology">Biology</option>
-        <option value="Engineering">Engineering</option>
-      </select>
-      <input type="text" id="contact" placeholder="Contact info (phone/email/Telegram)">
-      <button onclick="postProject()">Post Project</button>
-
-      <h3>Search Projects</h3>
-      <select id="searchCity"></select>
-      <select id="searchType"></select>
-      <select id="searchTheme"></select>
-      <button onclick="searchProjects()">Search</button>
-
-      <div id="projectList"></div>
-    </div>
+  <div class="container" id="auth-container">
+    <h2 id="form-title">Sign In</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button id="submit-button">Sign In</button>
+    <div class="toggle" id="toggle-form">Don't have an account? Register</div>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js"></script>
+  <div class="container hidden" id="main-container">
+    <h2>Welcome to EC Uzbekistan</h2>
+    <input type="text" id="project-title" placeholder="Project Title">
+    <select id="project-location">
+      <option value="">Select Location</option>
+      <option value="Tashkent">Tashkent</option>
+      <option value="Andijan">Andijan</option>
+      <option value="Fergana">Fergana</option>
+    </select>
+    <select id="project-type">
+      <option value="">Type of EC</option>
+      <option value="Volunteering">Volunteering</option>
+      <option value="Research">Research</option>
+      <option value="Internship">Internship</option>
+    </select>
+    <select id="project-theme">
+      <option value="">Theme of EC</option>
+      <option value="Environment">Environment</option>
+      <option value="Education">Education</option>
+      <option value="Technology">Technology</option>
+    </select>
+    <button id="post-project">Post Project</button>
+    <input type="text" id="search-query" placeholder="Search projects">
+    <button id="search-button">Search</button>
+    <div id="search-results"></div>
+  </div>
+
   <script>
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-      projectId: "YOUR_PROJECT",
-      storageBucket: "YOUR_PROJECT.appspot.com",
-      messagingSenderId: "SENDER_ID",
-      appId: "APP_ID"
+      apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
+      authDomain: "extracurricularsuzbekistan.firebaseapp.com",
+      databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com",
+      projectId: "extracurricularsuzbekistan",
+      storageBucket: "extracurricularsuzbekistan.appspot.com",
+      messagingSenderId: "555521664728",
+      appId: "1:555521664728:web:bf72cb8384be98ff7b99ad",
+      measurementId: "G-Z53076ZBCJ"
     };
+
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
 
-    const authSection = document.getElementById('authSection');
-    const appSection = document.getElementById('appSection');
-    const message = document.getElementById('message');
+    let isLogin = true;
 
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        authSection.classList.add('hidden');
-        appSection.classList.remove('hidden');
-        populateSearchFilters();
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitButton = document.getElementById('submit-button');
+    const toggleForm = document.getElementById('toggle-form');
+    const formTitle = document.getElementById('form-title');
+    const authContainer = document.getElementById('auth-container');
+    const mainContainer = document.getElementById('main-container');
+
+    submitButton.addEventListener('click', () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+
+      if (isLogin) {
+        auth.signInWithEmailAndPassword(email, password)
+          .then(() => {
+            authContainer.classList.add('hidden');
+            mainContainer.classList.remove('hidden');
+          })
+          .catch(error => alert(error.message));
       } else {
-        authSection.classList.remove('hidden');
-        appSection.classList.add('hidden');
+        auth.createUserWithEmailAndPassword(email, password)
+          .then(() => {
+            authContainer.classList.add('hidden');
+            mainContainer.classList.remove('hidden');
+          })
+          .catch(error => alert(error.message));
       }
     });
 
-    function register() {
-      const email = document.getElementById('registerEmail').value;
-      const password = document.getElementById('registerPassword').value;
-      auth.createUserWithEmailAndPassword(email, password).catch(e => {
-        message.textContent = e.message;
-      });
-    }
+    toggleForm.addEventListener('click', () => {
+      isLogin = !isLogin;
+      formTitle.textContent = isLogin ? 'Sign In' : 'Register';
+      submitButton.textContent = isLogin ? 'Sign In' : 'Register';
+      toggleForm.textContent = isLogin ? "Don't have an account? Register" : "Already have an account? Sign In";
+    });
 
-    function login() {
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
-      auth.signInWithEmailAndPassword(email, password).catch(e => {
-        message.textContent = "Incorrect email or password.";
-      });
-    }
+    document.getElementById('post-project').addEventListener('click', () => {
+      const title = document.getElementById('project-title').value;
+      const location = document.getElementById('project-location').value;
+      const type = document.getElementById('project-type').value;
+      const theme = document.getElementById('project-theme').value;
 
-    function logout() {
-      auth.signOut();
-    }
-
-    function postProject() {
-      const uid = auth.currentUser.uid;
-      const location = document.getElementById('location').value;
-      const type = document.getElementById('type').value;
-      const theme = document.getElementById('theme').value;
-      const contact = document.getElementById('contact').value;
-      const postData = { uid, location, type, theme, contact };
-      db.ref('projects').push(postData);
-      alert('Project Posted!');
-    }
-
-    function populateSearchFilters() {
-      const cities = ["Tashkent","Andijan","Namangan","Fergana","Bukhara","Samarkand","Navoi","Kokand","Urgench","Nukus"];
-      const types = ["Volunteering","Afterschool Club","Outdoor Activity","Research","Startup"];
-      const themes = ["Computer Science","Psychology","Art","Business","Biology","Engineering"];
-
-      const fillOptions = (select, items) => {
-        select.innerHTML = '<option value="">Any</option>' + items.map(i => `<option value="${i}">${i}</option>`).join('');
+      if (!title || !location || !type || !theme) {
+        alert("Please fill all fields");
+        return;
       }
-      fillOptions(document.getElementById('searchCity'), cities);
-      fillOptions(document.getElementById('searchType'), types);
-      fillOptions(document.getElementById('searchTheme'), themes);
-    }
 
-    function searchProjects() {
-      const city = document.getElementById('searchCity').value;
-      const type = document.getElementById('searchType').value;
-      const theme = document.getElementById('searchTheme').value;
+      const projectData = {
+        title,
+        location,
+        type,
+        theme,
+        timestamp: Date.now()
+      };
 
-      db.ref('projects').once('value', snapshot => {
-        const list = document.getElementById('projectList');
-        list.innerHTML = '';
-        snapshot.forEach(child => {
-          const data = child.val();
-          if ((city === '' || data.location === city) &&
-              (type === '' || data.type === type) &&
-              (theme === '' || data.theme === theme)) {
-            const div = document.createElement('div');
-            div.className = 'project';
-            div.innerHTML = `<strong>${data.type}</strong> in ${data.location} - ${data.theme}<br>Contact: ${data.contact}`;
-            list.appendChild(div);
+      db.ref('projects').push(projectData)
+        .then(() => alert("Project posted!"))
+        .catch(err => alert(err.message));
+    });
+
+    document.getElementById('search-button').addEventListener('click', () => {
+      const query = document.getElementById('search-query').value.toLowerCase();
+      const resultsDiv = document.getElementById('search-results');
+      resultsDiv.innerHTML = "Searching...";
+
+      db.ref('projects').once('value')
+        .then(snapshot => {
+          const projects = snapshot.val();
+          resultsDiv.innerHTML = "";
+          for (let key in projects) {
+            const project = projects[key];
+            if (
+              project.title.toLowerCase().includes(query) ||
+              project.location.toLowerCase().includes(query) ||
+              project.type.toLowerCase().includes(query) ||
+              project.theme.toLowerCase().includes(query)
+            ) {
+              const div = document.createElement('div');
+              div.textContent = ${project.title} | ${project.location} | ${project.type} | ${project.theme};
+              resultsDiv.appendChild(div);
+            }
           }
+          if (resultsDiv.innerHTML === "") resultsDiv.innerHTML = "No results found.";
         });
-      });
-    }
+    });
   </script>
 </body>
 </html>
