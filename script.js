@@ -1,6 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
-
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
   authDomain: "extracurricularsuzbekistan.firebaseapp.com",
@@ -8,38 +6,27 @@ const firebaseConfig = {
   projectId: "extracurricularsuzbekistan",
   storageBucket: "extracurricularsuzbekistan.appspot.com",
   messagingSenderId: "555521664728",
-  appId: "1:555521664728:web:bf72cb8384be98ff7b99ad",
-  measurementId: "G-Z53076ZBCJ"
+  appId: "1:555521664728:web:bf72cb8384be98ff7b99ad"
 };
 
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
-const form = document.getElementById('activityForm');
-const activitiesDiv = document.getElementById('activities');
-
-form.addEventListener('submit', (e) => {
+// Handle form submission
+document.getElementById("activityForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
-  const title = document.getElementById('title').value;
-  const description = document.getElementById('description').value;
+  const title = document.getElementById("title").value;
+  const description = document.getElementById("description").value;
 
-  push(ref(database, 'activities'), {
-    title,
-    description,
-    timestamp: Date.now()
-  });
-
-  form.reset();
-});
-
-onValue(ref(database, 'activities'), (snapshot) => {
-  activitiesDiv.innerHTML = '';
-  snapshot.forEach(childSnapshot => {
-    const activity = childSnapshot.val();
-    const div = document.createElement('div');
-    div.className = 'activity';
-    div.innerHTML = <h3>${activity.title}</h3><p>${activity.description}</p>;
-    activitiesDiv.appendChild(div);
+  database.ref("activities").push({
+    title: title,
+    description: description
+  }).then(() => {
+    alert("✅ Activity submitted!");
+    document.getElementById("activityForm").reset();
+  }).catch((error) => {
+    console.error("❌ Error writing to database:", error);
   });
 });
