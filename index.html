@@ -1,142 +1,150 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EC & Internship Listings</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-    input, textarea, button {
-      width: 100%;
-      margin: 8px 0;
-      padding: 10px;
-      font-size: 16px;
-    }
-    textarea {
-      resize: vertical;
-    }
-    button {
-      cursor: pointer;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Extracurriculars Uzbekistan</title>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-4 text-center">Extracurriculars Uzbekistan</h1>
 
-  <h1>Extracurricular & Internship Submissions</h1>
+    <!-- Auth Section -->
+    <div class="bg-white p-6 rounded shadow-md max-w-md mx-auto mb-6">
+      <h2 class="text-xl font-semibold mb-4" id="authTitle">Sign In</h2>
+      <input type="email" id="email" placeholder="Email" class="w-full mb-3 p-2 border rounded">
+      <input type="password" id="password" placeholder="Password" class="w-full mb-3 p-2 border rounded">
+      <button id="authButton" class="bg-blue-500 text-white w-full p-2 rounded">Sign In</button>
+      <p class="mt-2 text-sm text-center">
+        <span id="toggleAuth" class="text-blue-600 cursor-pointer">Don't have an account? Register</span>
+      </p>
+    </div>
 
-  <!-- Auth Section -->
-  <div id="authSection">
-    <h2>Login or Register</h2>
-    <input id="email" type="email" placeholder="Email" required />
-    <input id="password" type="password" placeholder="Password" required />
-    <button id="loginBtn">Login</button>
-    <button id="registerBtn">Register</button>
-    <button id="logoutBtn" style="display:none">Logout</button>
+    <!-- Main Content (hidden until logged in) -->
+    <div id="mainApp" class="hidden">
+
+      <!-- Post Project Form -->
+      <div class="bg-white p-6 rounded shadow-md mb-6">
+        <h2 class="text-xl font-semibold mb-4">Post Your Project</h2>
+        <input type="text" id="projectTitle" placeholder="Project Title" class="w-full mb-3 p-2 border rounded">
+        <textarea id="projectDescription" placeholder="Description" class="w-full mb-3 p-2 border rounded"></textarea>
+        <input type="text" id="projectLocation" placeholder="Location" class="w-full mb-3 p-2 border rounded">
+        <input type="text" id="projectType" placeholder="Type of EC (e.g., internship, volunteer)" class="w-full mb-3 p-2 border rounded">
+        <input type="text" id="contactInfo" placeholder="Contact Info" class="w-full mb-3 p-2 border rounded">
+        <button onclick="postProject()" class="bg-green-500 text-white w-full p-2 rounded">Post</button>
+      </div>
+
+      <!-- Search Section -->
+      <div class="bg-white p-6 rounded shadow-md mb-6">
+        <h2 class="text-xl font-semibold mb-4">Search Projects</h2>
+        <input type="text" id="searchLocation" placeholder="Preferred Location" class="w-full mb-3 p-2 border rounded">
+        <input type="text" id="searchType" placeholder="Type of EC" class="w-full mb-3 p-2 border rounded">
+        <button onclick="searchProjects()" class="bg-purple-500 text-white w-full p-2 rounded">Search</button>
+      </div>
+
+      <!-- Display Results -->
+      <div id="projectResults" class="space-y-4"></div>
+    </div>
   </div>
 
-  <p id="userInfo">Not logged in</p>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, push, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-  <!-- Submission Form -->
-  <form id="activityForm" style="display:none">
-    <input id="title" placeholder="Title" required />
-    <textarea id="description" placeholder="Description" required></textarea>
-    <input id="location" placeholder="Location" required />
-    <input id="type" placeholder="Type (e.g. Hackathon, Volunteering)" required />
-    <button type="submit">Submit</button>
-  </form>
-
-  <!-- Firebase Scripts -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-
-  <!-- Firebase Config & Logic -->
-  <script>
-    // TODO: Replace this with your actual config
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
+      authDomain: "extracurricularsuzbekistan.firebaseapp.com",
+      databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com",
+      projectId: "extracurricularsuzbekistan",
+      storageBucket: "extracurricularsuzbekistan.appspot.com",
+      messagingSenderId: "555521664728",
+      appId: "1:555521664728:web:bf72cb8384be98ff7b99ad",
+      measurementId: "G-Z53076ZBCJ"
     };
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getDatabase(app);
 
-    const auth = firebase.auth();
-    const db = firebase.database();
+    let isRegister = false;
 
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const loginBtn = document.getElementById('loginBtn');
-    const registerBtn = document.getElementById('registerBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const userInfo = document.getElementById('userInfo');
-    const form = document.getElementById('activityForm');
+    document.getElementById("toggleAuth").addEventListener("click", () => {
+      isRegister = !isRegister;
+      document.getElementById("authTitle").innerText = isRegister ? "Register" : "Sign In";
+      document.getElementById("authButton").innerText = isRegister ? "Register" : "Sign In";
+      document.getElementById("toggleAuth").innerText = isRegister ? "Already have an account? Sign In" : "Don't have an account? Register";
+    });
 
-    // Handle auth state
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        userInfo.textContent = `Logged in as ${user.email}`;
-        logoutBtn.style.display = 'inline';
-        form.style.display = 'block';
+    document.getElementById("authButton").addEventListener("click", () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      if (isRegister) {
+        createUserWithEmailAndPassword(auth, email, password)
+          .then(() => alert("Registered Successfully"))
+          .catch(e => alert(e.message));
       } else {
-        userInfo.textContent = 'Not logged in';
-        logoutBtn.style.display = 'none';
-        form.style.display = 'none';
+        signInWithEmailAndPassword(auth, email, password)
+          .then(() => alert("Signed In Successfully"))
+          .catch(e => alert(e.message));
       }
     });
 
-    // Register
-    registerBtn.onclick = () => {
-      auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value)
-        .catch(error => alert(error.message));
-    };
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        document.getElementById("mainApp").classList.remove("hidden");
+      }
+    });
 
-    // Login
-    loginBtn.onclick = () => {
-      auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value)
-        .catch(error => alert(error.message));
-    };
+    window.postProject = function () {
+      const title = document.getElementById("projectTitle").value;
+      const description = document.getElementById("projectDescription").value;
+      const location = document.getElementById("projectLocation").value;
+      const type = document.getElementById("projectType").value;
+      const contact = document.getElementById("contactInfo").value;
 
-    // Logout
-    logoutBtn.onclick = () => {
-      auth.signOut();
-    };
-
-    // Form submission
-    form.onsubmit = (e) => {
-      e.preventDefault();
-      const user = auth.currentUser;
-      if (!user) return alert("You must be logged in");
-
-      const title = document.getElementById('title').value;
-      const description = document.getElementById('description').value;
-      const location = document.getElementById('location').value;
-      const type = document.getElementById('type').value;
-
-      db.ref('activities').push({
-        uid: user.uid,
-        email: user.email,
+      push(ref(db, 'projects/'), {
         title,
         description,
         location,
         type,
-        timestamp: Date.now()
-      });
-
-      form.reset();
-      alert("Submitted!");
+        contact
+      }).then(() => alert("Project posted!"));
     };
-  </script>
 
+    window.searchProjects = function () {
+      const locationQuery = document.getElementById("searchLocation").value.toLowerCase();
+      const typeQuery = document.getElementById("searchType").value.toLowerCase();
+      const resultsDiv = document.getElementById("projectResults");
+      resultsDiv.innerHTML = "";
+
+      get(child(ref(db), 'projects/')).then(snapshot => {
+        if (snapshot.exists()) {
+          Object.values(snapshot.val()).forEach(project => {
+            const matchesLocation = locationQuery === '' || project.location.toLowerCase().includes(locationQuery);
+            const matchesType = typeQuery === '' || project.type.toLowerCase().includes(typeQuery);
+
+            if (matchesLocation && matchesType) {
+              const card = document.createElement("div");
+              card.className = "bg-white p-4 rounded shadow";
+              card.innerHTML = `
+                <h3 class="text-lg font-bold">${project.title}</h3>
+                <p>${project.description}</p>
+                <p><strong>Location:</strong> ${project.location}</p>
+                <p><strong>Type:</strong> ${project.type}</p>
+                <p><strong>Contact:</strong> ${project.contact}</p>
+              `;
+              resultsDiv.appendChild(card);
+            }
+          });
+        }
+      });
+    }
+  </script>
 </body>
 </html>
