@@ -1,61 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Extracurriculars Uzbekistan</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  </head>
-  <body class="bg-gray-100 min-h-screen text-gray-800">
-    <div class="max-w-4xl mx-auto p-6">
-      <h1 class="text-3xl font-bold text-center mb-6">Extracurriculars Uzbekistan</h1>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Extracurriculars Uzbekistan</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #333;
+    }
+    form, .search-section, .results {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, textarea, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .project {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Extracurriculars Uzbekistan</h1>
+  <h2>Post a Project</h2>
+  <form id="projectForm">
+    <input id="title" placeholder="Title" required />
+    <textarea id="description" placeholder="Description" required></textarea>
+    <input id="location" placeholder="Location (e.g., Andijan)" required />
+    <select id="type" required>
+      <option value="">Select EC Type</option>
+      <option value="volunteering">Volunteering</option>
+      <option value="competition">Competition</option>
+      <option value="research">Research</option>
+      <option value="startup">Startup</option>
+      <option value="other">Other</option>
+    </select>
+    <button type="submit">Submit Project</button>
+  </form>
 
-      <div class="flex space-x-4 justify-center mb-6">
-        <button id="showSubmit" class="px-4 py-2 bg-blue-500 text-white rounded">Submit Project</button>
-        <button id="showSearch" class="px-4 py-2 bg-green-500 text-white rounded">Search Projects</button>
-      </div>
+  <div class="search-section">
+    <h2>Find a Project</h2>
+    <input id="searchLocation" placeholder="Enter location (e.g., Andijan)" />
+    <select id="searchType">
+      <option value="">Select EC Type</option>
+      <option value="volunteering">Volunteering</option>
+      <option value="competition">Competition</option>
+      <option value="research">Research</option>
+      <option value="startup">Startup</option>
+      <option value="other">Other</option>
+    </select>
+    <button onclick="searchProjects()">Search</button>
+  </div>
 
-      <!-- Submit Project Form -->
-      <div id="submitForm" class="bg-white p-6 rounded shadow">
-        <h2 class="text-xl font-semibold mb-4">Submit Your Project</h2>
-        <form id="activityForm" class="space-y-4">
-          <input id="title" class="w-full border p-2 rounded" placeholder="Title" required />
-          <textarea id="description" class="w-full border p-2 rounded" placeholder="Description" required></textarea>
-          <input id="location" class="w-full border p-2 rounded" placeholder="Location (e.g. Andijan)" required />
-          <select id="type" class="w-full border p-2 rounded" required>
-            <option value="">Select EC Type</option>
-            <option value="Volunteer">Volunteer</option>
-            <option value="Research">Research</option>
-            <option value="Internship">Internship</option>
-            <option value="Competition">Competition</option>
-            <option value="Other">Other</option>
-          </select>
-          <input id="contact" class="w-full border p-2 rounded" placeholder="Contact Info (e.g. Telegram, Email)" required />
-          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Submit</button>
-        </form>
-      </div>
+  <div id="results" class="results"></div>
 
-      <!-- Search Projects -->
-      <div id="searchSection" class="hidden bg-white p-6 rounded shadow">
-        <h2 class="text-xl font-semibold mb-4">Search Projects</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <input id="searchLocation" class="border p-2 rounded" placeholder="Search by Location" />
-          <select id="searchType" class="border p-2 rounded">
-            <option value="">All Types</option>
-            <option value="Volunteer">Volunteer</option>
-            <option value="Research">Research</option>
-            <option value="Internship">Internship</option>
-            <option value="Competition">Competition</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <button id="searchBtn" class="bg-green-600 text-white px-4 py-2 rounded">Search</button>
-        <div id="activities" class="mt-6 space-y-4"></div>
-      </div>
-    </div>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com/",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    <script src="script.js"></script>
-  </body>
+    const form = document.getElementById('projectForm');
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+      const location = document.getElementById('location').value;
+      const type = document.getElementById('type').value;
+      const newProject = {
+        title,
+        description,
+        location,
+        type,
+        timestamp: Date.now()
+      };
+      db.ref('projects').push(newProject);
+      form.reset();
+      alert("Project submitted!");
+    });
+
+    function searchProjects() {
+      const loc = document.getElementById('searchLocation').value.toLowerCase();
+      const type = document.getElementById('searchType').value.toLowerCase();
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<p>Loading...</p>';
+
+      db.ref('projects').once('value', (snapshot) => {
+        const projects = snapshot.val();
+        let output = '';
+        for (let id in projects) {
+          const p = projects[id];
+          if (
+            (!loc || p.location.toLowerCase().includes(loc)) &&
+            (!type || p.type.toLowerCase() === type)
+          ) {
+            output += `
+              <div class="project">
+                <h3>${p.title}</h3>
+                <p><strong>Description:</strong> ${p.description}</p>
+                <p><strong>Location:</strong> ${p.location}</p>
+                <p><strong>Type:</strong> ${p.type}</p>
+              </div>
+            `;
+          }
+        }
+        resultsDiv.innerHTML = output || '<p>No matching projects found.</p>';
+      });
+    }
+  </script>
+</body>
 </html>
+
