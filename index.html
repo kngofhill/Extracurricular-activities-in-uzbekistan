@@ -1,215 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EC Uzbekistan</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Extracurriculars Uzbekistan</title>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f0f0f0;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background: white;
       padding: 20px;
-      margin-top: 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    h2, h3 {
-      text-align: center;
     }
     input, select, button {
-      display: block;
-      width: 100%;
+      margin: 5px;
+      padding: 8px;
+    }
+    .hidden {
+      display: none;
+    }
+    .project {
+      border: 1px solid #ddd;
       padding: 10px;
       margin: 10px 0;
     }
-    .hidden { display: none; }
-    .project { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
   </style>
 </head>
 <body>
-  <div class="container" id="auth-container">
-    <h2 id="form-title">Sign In</h2>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button id="submit-button">Sign In</button>
-    <div style="text-align:center; cursor:pointer; color:blue; text-decoration:underline;" id="toggle-form">Don't have an account? Register</div>
+  <h2>Extracurriculars Uzbekistan</h2>
+
+  <div id="auth-container">
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button id="submit-button">Log In</button>
+    <p>
+      <span id="toggle-auth" style="cursor:pointer; color:blue">Don't have an account? Register</span>
+    </p>
   </div>
 
-  <div class="container hidden" id="profile-container">
-    <h2>Complete Your Profile</h2>
-    <input type="text" id="full-name" placeholder="Full Name">
-    <input type="text" id="school" placeholder="School Name">
-    <button id="save-profile">Save Profile</button>
+  <div id="profile-container" class="hidden">
+    <input type="text" id="name" placeholder="Your Name" required />
+    <button onclick="saveProfile()">Save Profile</button>
   </div>
 
-  <div class="container hidden" id="main-container">
-    <h2>Explore Extracurricular Activities</h2>
+  <div id="main-container" class="hidden">
+    <h3>Post Your Project</h3>
+    <input type="text" id="project-name" placeholder="Project Name" required />
+    <input type="text" id="project-desc" placeholder="Project Description" required />
+    <select id="city" name="city" required>
+      <option disabled selected>Select city</option>
+      <option>Andijan</option>
+      <option>Bukhara</option>
+      <option>Fergana</option>
+      <option>Jizzakh</option>
+      <option>Khorezm</option>
+      <option>Karakalpakstan</option>
+      <option>Kashkadarya</option>
+      <option>Namangan</option>
+      <option>Navoiy</option>
+      <option>Samarkand</option>
+      <option>Sirdarya</option>
+      <option>Surkhandarya</option>
+      <option>Tashkent</option>
+      <option>Tashkent City</option>
+    </select>
+    <select id="type" name="type" required>
+      <option disabled selected>Select EC type</option>
+      <option>Volunteering</option>
+      <option>Outdoor Activity</option>
+      <option>Afterschool Club</option>
+      <option>Competition</option>
+      <option>Internship</option>
+      <option>Research</option>
+      <option>Creative Project</option>
+    </select>
+    <select id="theme" name="theme" required>
+      <option disabled selected>Select theme</option>
+      <option>Technology</option>
+      <option>Environment</option>
+      <option>Art</option>
+      <option>Education</option>
+      <option>CS</option>
+      <option>Psychology</option>
+      <option>Business</option>
+      <option>Health</option>
+      <option>Engineering</option>
+      <option>Culture</option>
+    </select>
+    <button onclick="postProject()">Post</button>
 
-    <div>
-      <label for="filter-location">Filter by City:</label>
-      <select id="filter-location"></select>
+    <h3>Search Projects</h3>
+    <select id="search-city">
+      <option value="">Filter by city</option>
+    </select>
+    <select id="search-theme">
+      <option value="">Filter by theme</option>
+    </select>
+    <select id="search-type">
+      <option value="">Filter by EC type</option>
+    </select>
+    <button onclick="searchProjects()">Search</button>
 
-      <label for="filter-type">Filter by Type:</label>
-      <select id="filter-type"></select>
-
-      <label for="filter-theme">Filter by Theme:</label>
-      <select id="filter-theme"></select>
-
-      <button id="apply-filters">Apply Filters</button>
-    </div>
-
-    <div id="activity-list"></div>
-    <br>
-    <button id="open-post">Go to Profile & Post</button>
-  </div>
-
-  <div class="container hidden" id="post-container">
-    <h2>Post New Extracurricular Activity</h2>
-    <input type="text" id="project-title" placeholder="Project Title">
-    <select id="project-location"></select>
-    <select id="project-type"></select>
-    <select id="project-theme"></select>
-    <input type="text" id="contact-info" placeholder="Contact (Email, Phone or Telegram)">
-    <button id="post-project">Post Project</button>
-    <button id="back-home">Back to Activities</button>
+    <div id="results"></div>
   </div>
 
   <script>
     const firebaseConfig = {
-  apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
-  authDomain: "extracurricularsuzbekistan.firebaseapp.com",
-  databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com",
-  projectId: "extracurricularsuzbekistan",
-  storageBucket: "extracurricularsuzbekistan.appspot.com",
-  messagingSenderId: "555521664728",
-  appId: "1:555521664728:web:bf72cb8384be98ff7b99ad",
-  measurementId: "G-Z53076ZBCJ"
-     };
+      apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
+      authDomain: "extracurricularsuzbekistan.firebaseapp.com",
+      databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com",
+      projectId: "extracurricularsuzbekistan",
+      storageBucket: "extracurricularsuzbekistan.firebasestorage.app",
+      messagingSenderId: "555521664728",
+      appId: "1:555521664728:web:bf72cb8384be98ff7b99ad",
+      measurementId: "G-Z53076ZBCJ"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.database();
-
-    const cities = ["Tashkent", "Andijan", "Fergana", "Samarkand", "Bukhara", "Navoi", "Namangan", "Khorezm", "Karakalpakstan", "Kashkadarya", "Surkhandarya", "Sirdarya", "Jizzakh"];
-    const types = ["Volunteering", "Afterschool Club", "Outdoor Activity", "Workshop", "Research", "Internship"];
-    const themes = ["Computer Science", "Psychology", "Math", "Environment", "Art", "Business", "Literature"];
-
-    const selectFields = [
-      { id: 'project-location', placeholder: 'Select City', options: cities },
-      { id: 'project-type', placeholder: 'Select Type', options: types },
-      { id: 'project-theme', placeholder: 'Select Theme', options: themes },
-      { id: 'filter-location', placeholder: 'Any City', options: cities },
-      { id: 'filter-type', placeholder: 'Any Type', options: types },
-      { id: 'filter-theme', placeholder: 'Any Theme', options: themes }
-    ];
-
-    selectFields.forEach(({id, placeholder, options}) => {
-      const select = document.getElementById(id);
-      select.innerHTML = `<option value="">${placeholder}</option>` + options.map(o => `<option value="${o}">${o}</option>`).join('');
-    });
+    const db = firebase.firestore();
 
     let isLogin = true;
-    document.getElementById('submit-button').addEventListener('click', () => {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const handler = isLogin ? auth.signInWithEmailAndPassword : auth.createUserWithEmailAndPassword;
-      handler(email, password)
-        .then(user => {
-          document.getElementById('auth-container').classList.add('hidden');
-          if (isLogin) {
-            showMain();
-          } else {
-            document.getElementById('profile-container').classList.remove('hidden');
-          }
-        })
-        .catch(e => alert("Authentication Failed: " + e.message));
-    });
 
-    document.getElementById('toggle-form').addEventListener('click', () => {
+    document.getElementById('toggle-auth').addEventListener('click', () => {
       isLogin = !isLogin;
-      document.getElementById('form-title').textContent = isLogin ? 'Sign In' : 'Register';
-      document.getElementById('submit-button').textContent = isLogin ? 'Sign In' : 'Register';
-      document.getElementById('toggle-form').textContent = isLogin ? "Don't have an account? Register" : "Already have an account? Sign In";
+      document.getElementById('submit-button').textContent = isLogin ? "Log In" : "Register";
+      document.getElementById('toggle-auth').textContent = isLogin ? "Don't have an account? Register" : "Already have an account? Log In";
     });
 
-    document.getElementById('save-profile').addEventListener('click', () => {
+    document.getElementById('submit-button').addEventListener('click', () => {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const handler = isLogin ? auth.signInWithEmailAndPassword : auth.createUserWithEmailAndPassword;
+
+      handler(email, password)
+        .then(() => {
+          auth.onAuthStateChanged(user => {
+            if (user) {
+              document.getElementById('auth-container').classList.add('hidden');
+              if (isLogin) {
+                showMain();
+              } else {
+                document.getElementById('profile-container').classList.remove('hidden');
+              }
+            }
+          });
+        })
+        .catch(e => {
+          console.error(e);
+          alert("Authentication Failed: " + e.message);
+        });
+    });
+
+    function saveProfile() {
+      const name = document.getElementById('name').value;
       const user = auth.currentUser;
-      if (!user) return;
-      const profile = {
-        name: document.getElementById('full-name').value,
-        school: document.getElementById('school').value
-      };
-      db.ref('profiles/' + user.uid).set(profile)
+      if (!user) return alert("No user logged in.");
+
+      db.collection('users').doc(user.uid).set({ name })
         .then(() => {
           document.getElementById('profile-container').classList.add('hidden');
           showMain();
         });
-    });
+    }
 
     function showMain() {
       document.getElementById('main-container').classList.remove('hidden');
-      loadActivities();
+      populateFilters();
     }
 
-    function loadActivities(filters = {}) {
-      db.ref('projects').once('value').then(snapshot => {
-        const container = document.getElementById('activity-list');
-        container.innerHTML = '';
-        const data = snapshot.val() || {};
-        Object.values(data).forEach(p => {
-          if (
-            (!filters.city || p.location === filters.city) &&
-            (!filters.type || p.type === filters.type) &&
-            (!filters.theme || p.theme === filters.theme)
-          ) {
-            const div = document.createElement('div');
-            div.className = 'project';
-            div.innerHTML = `<strong>${p.title}</strong><br>${p.location} | ${p.type} | ${p.theme}<br>Contact: ${p.contact}`;
-            container.appendChild(div);
-          }
+    function postProject() {
+      const user = auth.currentUser;
+      if (!user) return alert("You must be logged in.");
+
+      const name = document.getElementById('project-name').value.trim();
+      const desc = document.getElementById('project-desc').value.trim();
+      const city = document.getElementById('city').value;
+      const theme = document.getElementById('theme').value;
+      const type = document.getElementById('type').value;
+
+      db.collection('projects').add({ name, desc, city, theme, type, uid: user.uid })
+        .then(() => {
+          alert("Project posted!");
+          document.getElementById('project-name').value = '';
+          document.getElementById('project-desc').value = '';
+        });
+    }
+
+    function populateFilters() {
+      const cities = Array.from(document.getElementById('city').options).slice(1).map(o => o.value);
+      const themes = Array.from(document.getElementById('theme').options).slice(1).map(o => o.value);
+      const types = Array.from(document.getElementById('type').options).slice(1).map(o => o.value);
+
+      fillSelect('search-city', cities);
+      fillSelect('search-theme', themes);
+      fillSelect('search-type', types);
+    }
+
+    function fillSelect(id, values) {
+      const select = document.getElementById(id);
+      select.innerHTML = `<option value="">${select.options[0].text}</option>`;
+      values.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        select.appendChild(opt);
+      });
+    }
+
+    function searchProjects() {
+      const city = document.getElementById('search-city').value;
+      const theme = document.getElementById('search-theme').value;
+      const type = document.getElementById('search-type').value;
+
+      let query = db.collection('projects');
+      if (city) query = query.where('city', '==', city);
+      if (theme) query = query.where('theme', '==', theme);
+      if (type) query = query.where('type', '==', type);
+
+      query.get().then(snapshot => {
+        const results = document.getElementById('results');
+        results.innerHTML = '';
+        if (snapshot.empty) {
+          results.innerHTML = '<p>No projects found.</p>';
+          return;
+        }
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement('div');
+          div.className = 'project';
+          div.innerHTML = `<strong>${data.name}</strong><p>${data.desc}</p><small>${data.city} - ${data.theme} - ${data.type}</small>`;
+          results.appendChild(div);
         });
       });
     }
-
-    document.getElementById('apply-filters').addEventListener('click', () => {
-      loadActivities({
-        city: document.getElementById('filter-location').value,
-        type: document.getElementById('filter-type').value,
-        theme: document.getElementById('filter-theme').value
-      });
-    });
-
-    document.getElementById('open-post').addEventListener('click', () => {
-      document.getElementById('main-container').classList.add('hidden');
-      document.getElementById('post-container').classList.remove('hidden');
-    });
-
-    document.getElementById('back-home').addEventListener('click', () => {
-      document.getElementById('post-container').classList.add('hidden');
-      document.getElementById('main-container').classList.remove('hidden');
-    });
-
-    document.getElementById('post-project').addEventListener('click', () => {
-      const title = document.getElementById('project-title').value;
-      const location = document.getElementById('project-location').value;
-      const type = document.getElementById('project-type').value;
-      const theme = document.getElementById('project-theme').value;
-      const contact = document.getElementById('contact-info').value;
-      if (!title || !location || !type || !theme || !contact) return alert("Please fill all fields");
-
-      db.ref('projects').push({ title, location, type, theme, contact, timestamp: Date.now() })
-        .then(() => alert("Project posted!"));
-    });
   </script>
 </body>
 </html>
+
