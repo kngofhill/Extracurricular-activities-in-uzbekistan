@@ -3,214 +3,188 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EC Portal Uzbekistan</title>
+  <title>EC Uzbekistan</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f0f4f8;
-      margin: 0;
       padding: 20px;
-    }
-    .container {
-      max-width: 700px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    input, select, button, textarea {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
+      background-color: #f4f4f4;
     }
     .hidden { display: none; }
+    form, .profile, .post-section, .project-list { margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 10px; }
+    input, select, button { margin-top: 10px; display: block; padding: 8px; width: 100%; }
+    .project-item { border: 1px solid #ddd; margin: 10px 0; padding: 10px; }
   </style>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
-      authDomain: "extracurricularsuzbekistan.firebaseapp.com",
-      databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com",
-      projectId: "extracurricularsuzbekistan",
-      storageBucket: "extracurricularsuzbekistan.appspot.com",
-      messagingSenderId: "555521664728",
-      appId: "1:555521664728:web:bf72cb8384be98ff7b99ad",
-      measurementId: "G-Z53076ZBCJ"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    const registerForm = document.getElementById("registerForm");
-    const loginForm = document.getElementById("loginForm");
-    const postForm = document.getElementById("postForm");
-    const userPanel = document.getElementById("userPanel");
-    const projectsDiv = document.getElementById("projectsDiv");
-    const searchForm = document.getElementById("searchForm");
-    const message = document.getElementById("message");
-
-    const cities = ["Tashkent", "Andijan", "Fergana", "Namangan", "Bukhara", "Samarkand", "Nukus", "Khiva", "Kokand", "Jizzakh", "Navoi", "Termez", "Qarshi", "Gulistan", "Urgench"];
-    const types = ["Volunteering", "Afterschool Club", "Outdoor Activity", "Workshop", "Competition", "Online Course"];
-    const themes = ["Computer Science", "Psychology", "Mathematics", "Biology", "Languages", "Engineering", "Arts", "Economics"];
-
-    function populateOptions(select, options) {
-      select.innerHTML = '<option value="">Select</option>';
-      options.forEach(opt => {
-        const option = document.createElement("option");
-        option.value = opt;
-        option.textContent = opt;
-        select.appendChild(option);
-      });
-    }
-
-    populateOptions(document.getElementById("city"), cities);
-    populateOptions(document.getElementById("type"), types);
-    populateOptions(document.getElementById("theme"), themes);
-    populateOptions(document.getElementById("searchCity"), cities);
-    populateOptions(document.getElementById("searchTheme"), themes);
-
-    registerForm.addEventListener("submit", e => {
-      e.preventDefault();
-      const email = registerForm.email.value;
-      const password = registerForm.password.value;
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => message.textContent = "Registered and logged in!")
-        .catch(err => message.textContent = "Error: " + err.message);
-    });
-
-    loginForm.addEventListener("submit", e => {
-      e.preventDefault();
-      const email = loginForm.email.value;
-      const password = loginForm.password.value;
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => message.textContent = "Logged in!")
-        .catch(err => message.textContent = "Login failed: Incorrect email or password");
-    });
-
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        registerForm.classList.add("hidden");
-        loginForm.classList.add("hidden");
-        userPanel.classList.remove("hidden");
-        loadProjects();
-      } else {
-        userPanel.classList.add("hidden");
-        registerForm.classList.remove("hidden");
-        loginForm.classList.remove("hidden");
-      }
-    });
-
-    document.getElementById("logout").addEventListener("click", () => signOut(auth));
-
-    postForm.addEventListener("submit", e => {
-      e.preventDefault();
-      const data = {
-        title: postForm.title.value,
-        city: postForm.city.value,
-        type: postForm.type.value,
-        theme: postForm.theme.value,
-        contact: postForm.contact.value,
-        desc: postForm.desc.value
-      };
-      push(ref(db, "projects/"), data).then(() => {
-        message.textContent = "Project posted!";
-        postForm.reset();
-      });
-    });
-
-    function loadProjects(filter = {}) {
-      onValue(ref(db, "projects/"), snapshot => {
-        const data = snapshot.val();
-        projectsDiv.innerHTML = "";
-        for (let id in data) {
-          const project = data[id];
-          if (
-            (!filter.city || project.city === filter.city) &&
-            (!filter.theme || project.theme === filter.theme)
-          ) {
-            const div = document.createElement("div");
-            div.style.border = "1px solid #ddd";
-            div.style.padding = "10px";
-            div.style.marginBottom = "10px";
-            div.innerHTML = `<b>${project.title}</b><br>${project.city} | ${project.type} | ${project.theme}<br>${project.desc}<br>Contact: ${project.contact}`;
-            projectsDiv.appendChild(div);
-          }
-        }
-      });
-    }
-
-    searchForm.addEventListener("submit", e => {
-      e.preventDefault();
-      loadProjects({
-        city: searchForm.searchCity.value,
-        theme: searchForm.searchTheme.value
-      });
-    });
-  </script>
 </head>
 <body>
-  <div class="container">
-    <h2>Welcome to EC Portal Uzbekistan</h2>
-    <div id="message"></div>
+  <h2>EC Uzbekistan</h2>
 
-    <form id="registerForm">
-      <h3>Register</h3>
-      <input type="email" name="email" placeholder="Email" required />
-      <input type="password" name="password" placeholder="Password" required />
-      <button type="submit">Register</button>
-    </form>
-
-    <form id="loginForm">
-      <h3>Login</h3>
-      <input type="email" name="email" placeholder="Email" required />
-      <input type="password" name="password" placeholder="Password" required />
-      <button type="submit">Login</button>
-    </form>
-
-    <div id="userPanel" class="hidden">
-      <button id="logout">Logout</button>
-      <h3>Post New Project</h3>
-      <form id="postForm">
-        <input name="title" placeholder="Project Title" required />
-        <select id="city" name="city" required>
-          <option disabled selected>Select city</option>
-        </select>
-        
-        <select id="type" name="type" required>
-          <option disabled selected>Select EC type</option>
-        </select>
-        
-        <select id="theme" name="theme" required>
-          <option disabled selected>Select project theme</option>
-        </select>
-
-        <input name="contact" placeholder="Phone / Email / Telegram" required />
-        <textarea name="desc" placeholder="Description" required></textarea>
-        <button type="submit">Post Project</button>
-      </form>
-
-      <h3>Search Projects</h3>
-      <form id="searchForm">
-        <select id="searchCity"></select>
-        <select id="searchTheme"></select>
-        <button type="submit">Search</button>
-      </form>
-
-      <h3>Project Listings</h3>
-      <div id="projectsDiv"></div>
-    </div>
+  <div id="auth-section">
+    <h3>Register</h3>
+    <input type="email" id="registerEmail" placeholder="Email">
+    <input type="password" id="registerPassword" placeholder="Password">
+    <button onclick="register()">Register</button>
+    
+    <h3>Login</h3>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p id="authMessage"></p>
   </div>
+
+  <div id="profile-section" class="hidden">
+    <h3>Your Profile</h3>
+    <label>Select City</label>
+    <select id="userCity">
+      <option value="">Select your city</option>
+      <option>Andijan</option>
+      <option>Tashkent</option>
+      <option>Samarkand</option>
+      <option>Bukhara</option>
+      <option>Namangan</option>
+      <option>Fergana</option>
+      <option>Navoi</option>
+      <option>Khiva</option>
+    </select>
+    <label>Select Interests</label>
+    <select id="userInterests" multiple>
+      <option>Computer Science</option>
+      <option>Psychology</option>
+      <option>Volunteering</option>
+      <option>Outdoor Activities</option>
+      <option>Afterschool Clubs</option>
+      <option>Art</option>
+      <option>Business</option>
+    </select>
+    <button onclick="saveProfile()">Save Profile</button>
+  </div>
+
+  <div id="post-section" class="hidden">
+    <h3>Post Your Project</h3>
+    <input type="text" id="projectName" placeholder="Project Name">
+    <select id="projectCity">
+      <option>Select city</option>
+      <option>Andijan</option><option>Tashkent</option><option>Samarkand</option>
+      <option>Bukhara</option><option>Namangan</option><option>Fergana</option>
+      <option>Navoi</option><option>Khiva</option>
+    </select>
+    <select id="projectType">
+      <option>Select EC type</option>
+      <option>Volunteering</option>
+      <option>Outdoor Activity</option>
+      <option>Afterschool Club</option>
+      <option>Workshop</option>
+      <option>Research</option>
+    </select>
+    <select id="projectTheme">
+      <option>Select theme</option>
+      <option>Computer Science</option>
+      <option>Psychology</option>
+      <option>Art</option>
+      <option>Business</option>
+      <option>Sports</option>
+    </select>
+    <input type="number" id="maxCapacity" placeholder="Max Capacity">
+    <button onclick="postProject()">Post</button>
+  </div>
+
+  <div id="project-list" class="hidden">
+    <h3>Recommended Projects</h3>
+    <div id="projectsContainer"></div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DB_URL",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_BUCKET",
+      messagingSenderId: "YOUR_MSG_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    let currentUser = null;
+
+    function register() {
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          document.getElementById('authMessage').innerText = 'Registered successfully!';
+        })
+        .catch((error) => {
+          document.getElementById('authMessage').innerText = 'Error: ' + error.message;
+        });
+    }
+
+    function login() {
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          currentUser = userCredential.user;
+          document.getElementById('auth-section').classList.add('hidden');
+          document.getElementById('profile-section').classList.remove('hidden');
+          document.getElementById('post-section').classList.remove('hidden');
+          document.getElementById('project-list').classList.remove('hidden');
+          fetchProjects();
+        })
+        .catch((error) => {
+          document.getElementById('authMessage').innerText = 'Incorrect email or password';
+        });
+    }
+
+    function saveProfile() {
+      const city = document.getElementById('userCity').value;
+      const interests = Array.from(document.getElementById('userInterests').selectedOptions).map(o => o.value);
+      if (currentUser) {
+        db.ref('users/' + currentUser.uid + '/profile').set({ city, interests });
+        fetchProjects();
+      }
+    }
+
+    function postProject() {
+      const name = document.getElementById('projectName').value;
+      const city = document.getElementById('projectCity').value;
+      const type = document.getElementById('projectType').value;
+      const theme = document.getElementById('projectTheme').value;
+      const max = parseInt(document.getElementById('maxCapacity').value);
+
+      const postRef = db.ref('projects').push();
+      postRef.set({
+        name, city, type, theme, max, owner: currentUser.uid, members: []
+      });
+    }
+
+    function fetchProjects() {
+      db.ref('users/' + currentUser.uid + '/profile').once('value').then((snap) => {
+        const profile = snap.val();
+        if (!profile) return;
+
+        db.ref('projects').once('value').then((snapshot) => {
+          const projectsContainer = document.getElementById('projectsContainer');
+          projectsContainer.innerHTML = '';
+
+          snapshot.forEach((child) => {
+            const data = child.val();
+            if (data.city === profile.city || profile.interests.includes(data.theme)) {
+              const div = document.createElement('div');
+              div.className = 'project-item';
+              div.innerHTML = `<strong>${data.name}</strong><br>City: ${data.city}<br>Theme: ${data.theme}<br>Type: ${data.type}<br>Capacity: ${data.members?.length || 0}/${data.max}`;
+              projectsContainer.appendChild(div);
+            }
+          });
+        });
+      });
+    }
+  </script>
 </body>
 </html>
+
