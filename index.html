@@ -30,67 +30,39 @@
 
     <!-- Post Form -->
     <div id="post-section" class="hide">
-  <h3 class="mt-4">Create an EC Listing</h3>
-  <select id="location" class="form-control">
-    <option disabled selected>Choose location</option>
-    <!-- [locations] -->
-    <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
+      <h3 class="mt-4">Create an EC Listing</h3>
+      <select id="location" class="form-control">
+        <option disabled selected>Choose location</option>
+        <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
         <option>Samarkand</option><option>Bukhara</option><option>Namangan</option>
         <option>Khorezm</option><option>Karakalpakstan</option><option>Jizzakh</option>
         <option>Kashkadarya</option><option>Surkhandarya</option><option>Syrdarya</option>
         <option>Navoi</option><option>Gulistan</option>
-  </select>
-  <select id="field" class="form-control mt-2">
-    <option disabled selected>Choose field of EC</option>
-    <!-- [fields] -->
-    <option>STEM</option><option>Business</option><option>Art</option>
+      </select>
+      <select id="field" class="form-control mt-2">
+        <option disabled selected>Choose field of EC</option>
+        <option>STEM</option><option>Business</option><option>Art</option>
         <option>Leadership</option><option>Debate</option><option>Writing</option>
-  </select>
-  <select id="type" class="form-control mt-2">
-    <option disabled selected>Choose type of EC</option>
-    <!-- [types] -->
-      <option>Competition</option><option>Internship</option><option>Volunteering</option>
+      </select>
+      <select id="type" class="form-control mt-2">
+        <option disabled selected>Choose type of EC</option>
+        <option>Competition</option><option>Internship</option><option>Volunteering</option>
         <option>Online Course</option><option>Workshop</option><option>Club</option>
-  </select>
-  <input id="title" class="form-control mt-2" placeholder="Title" />
-  <textarea id="desc" class="form-control mt-2" placeholder="Description"></textarea>
-  <button id="submitBtn" class="btn btn-warning mt-2">Post</button>
-</div>
-
-<!-- ✅ Toast -->
-<!-- Toast Notification -->
-<div id="postToast" class="toast position-fixed bottom-0 end-0 m-3 align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-  <div class="d-flex">
-    <div class="toast-body">
-      ✅ Post submitted successfully!
+      </select>
+      <input id="title" class="form-control mt-2" placeholder="Title" />
+      <textarea id="desc" class="form-control mt-2" placeholder="Description"></textarea>
+      <button id="submitBtn" class="btn btn-warning mt-2">Post</button>
     </div>
-    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-  </div>
-</div>
 
-
-<!-- ... [Filter Section and Listings remain unchanged] -->
-
-<script>
-  // ... [Firebase setup and other code remains unchanged]
-
-  function showToast() {
-    const toast = document.getElementById("postToast");
-    const bsToast = new bootstrap.Toast(toast);
-    bsToast.show();
-  }
-
-  function hideToast() {
-    const toast = document.getElementById("postToast");
-    const bsToast = bootstrap.Toast.getInstance(toast);
-    if (bsToast) bsToast.hide();
-  }
-
-
-
-  // ... [filterBtn and other logic remains unchanged]
-</script>
-
+    <!-- Toast Notification -->
+    <div id="postToast" class="toast position-fixed bottom-0 end-0 m-3 align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          ✅ Post submitted successfully!
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
 
     <!-- Filter Section -->
     <div id="filter-section" class="mt-4 hide">
@@ -110,7 +82,6 @@
       </select>
       <button id="filterBtn" class="btn btn-info mt-2">Filter</button>
     </div>
-
 
     <!-- Listings -->
     <div id="listings" class="mt-4"></div>
@@ -142,6 +113,12 @@
     const filterSection = document.getElementById('filter-section');
     const listings = document.getElementById('listings');
 
+    function showToast() {
+      const toast = document.getElementById("postToast");
+      const bsToast = new bootstrap.Toast(toast);
+      bsToast.show();
+    }
+
     registerBtn.onclick = () => {
       auth.createUserWithEmailAndPassword(email.value, password.value)
         .then(() => alert('Registered successfully'))
@@ -167,30 +144,29 @@
       logoutBtn.classList.add('hide');
     };
 
-submitBtn.onclick = () => {
-  const loc = document.getElementById('location').value;
-  const field = document.getElementById('field').value;
-  const type = document.getElementById('type').value;
-  const title = document.getElementById('title').value;
-  const desc = document.getElementById('desc').value;
+    submitBtn.onclick = () => {
+      const loc = document.getElementById('location').value;
+      const field = document.getElementById('field').value;
+      const type = document.getElementById('type').value;
+      const title = document.getElementById('title').value;
+      const desc = document.getElementById('desc').value;
 
-  if (!title || !desc || !loc || !field || !type) return alert('Fill all fields');
+      if (!title || !desc || !loc || !field || !type) return alert('Fill all fields');
 
-  const newPostRef = db.ref('posts').push();
-  newPostRef.set({
-    title,
-    desc,
-    location: loc,
-    field,
-    type,
-    uid: auth.currentUser.uid
-  }).then(() => {
-    showToast(); // ✅ Show success toast
-  }).catch(err => {
-    alert("Failed to post: " + err.message);
-  });
-};
-
+      const newPostRef = db.ref('posts').push();
+      newPostRef.set({
+        title,
+        desc,
+        location: loc,
+        field,
+        type,
+        uid: auth.currentUser.uid
+      }).then(() => {
+        showToast();
+      }).catch(err => {
+        alert("Failed to post: " + err.message);
+      });
+    };
 
     filterBtn.onclick = () => {
       const fLoc = document.getElementById('filter-location').value;
@@ -215,7 +191,6 @@ submitBtn.onclick = () => {
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-Qmcn6UMfNfO/6J4W4rQxFh1EQ9hNMiXqRUuGHCKFgTMeKZynRyCyH2vsbnu4sl/8" crossorigin="anonymous"></script>
-
 </body>
 </html>
 
