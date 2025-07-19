@@ -1,69 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Explore extracurricular activities in Uzbekistan. Find and post EC opportunities by interest and region.">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EC Platform Uzbekistan</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-  <script defer src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-
-<body class="bg-gray-50 text-gray-900">
-  <div class="container mx-auto p-4">
-    <h1 class="text-3xl font-bold mb-4 text-center">Welcome to EC Platform Uzbekistan</h1>
+<body class="bg-gray-100 text-gray-800">
+  <div class="max-w-4xl mx-auto p-4">
+    <h1 class="text-3xl font-bold text-center mb-6">EC Platform Uzbekistan</h1>
 
     <!-- Login/Register Section -->
-    <div id="auth-section" class="mb-4">
-      <input id="email" type="email" placeholder="Email" class="border p-2 w-full mb-2">
-      <input id="password" type="password" placeholder="Password" class="border p-2 w-full mb-2">
-      <button onclick="register()" class="bg-green-500 text-white px-4 py-2 rounded">Register</button>
-      <button onclick="login()" class="bg-blue-500 text-white px-4 py-2 rounded ml-2">Login</button>
-      <p id="auth-message" class="text-red-500 mt-2"></p>
+    <div id="auth-section" class="mb-6">
+      <input type="email" id="email" placeholder="Email" class="border rounded p-2 mb-2 w-full" />
+      <input type="password" id="password" placeholder="Password" class="border rounded p-2 mb-2 w-full" />
+      <div class="flex gap-2">
+        <button onclick="login()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Login</button>
+        <button onclick="register()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Register</button>
+        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Logout</button>
+      </div>
+      <p id="auth-status" class="mt-2 text-sm"></p>
     </div>
 
-    <!-- Profile Section -->
-    <div id="profile-section" class="hidden">
-      <h2 class="text-2xl font-bold mb-2">Complete Your Profile</h2>
-      <select id="location" class="border p-2 w-full mb-2">
-        <option value="Andijan">Andijan</option>
-        <option value="Tashkent">Tashkent</option>
-        <option value="Samarkand">Samarkand</option>
-      </select>
-      <select id="interests" multiple class="border p-2 w-full mb-2">
-        <option value="Robotics">Robotics</option>
-        <option value="Arts">Arts</option>
-        <option value="Science">Science</option>
-        <option value="Leadership">Leadership</option>
-      </select>
-      <button onclick="saveProfile()" class="bg-purple-500 text-white px-4 py-2 rounded">Save Profile</button>
+    <!-- Post Creation -->
+    <div id="post-section" class="mb-6 hidden">
+      <h2 class="text-xl font-semibold mb-2">Post Your EC</h2>
+      <input id="title" placeholder="EC Title" class="border p-2 w-full mb-2" />
+      <textarea id="description" placeholder="EC Description" class="border p-2 w-full mb-2"></textarea>
+      <input id="location" placeholder="Your Location" class="border p-2 w-full mb-2" />
+      <input id="interest" placeholder="Interest Tags (comma-separated)" class="border p-2 w-full mb-2" />
+      <button onclick="postEC()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded">Submit Post</button>
     </div>
 
-    <!-- Post Project Section -->
-    <div id="post-section" class="hidden mt-6">
-      <h2 class="text-2xl font-bold mb-2">Post Your EC</h2>
-      <input id="project-title" type="text" placeholder="Project Title" class="border p-2 w-full mb-2">
-      <select id="project-location" class="border p-2 w-full mb-2">
-        <option value="Andijan">Andijan</option>
-        <option value="Tashkent">Tashkent</option>
-        <option value="Samarkand">Samarkand</option>
-      </select>
-      <select id="project-type" class="border p-2 w-full mb-2">
-        <option value="Robotics">Robotics</option>
-        <option value="Arts">Arts</option>
-        <option value="Science">Science</option>
-      </select>
-      <input id="max-capacity" type="number" placeholder="Max Capacity" class="border p-2 w-full mb-2">
-      <button onclick="postProject()" class="bg-yellow-500 text-white px-4 py-2 rounded">Submit Project</button>
-    </div>
-
-    <!-- Show ECs Section -->
-    <div id="ecs-list" class="mt-6">
-      <h2 class="text-2xl font-bold mb-2">Available ECs</h2>
-      <ul id="project-display" class="space-y-2"></ul>
+    <!-- EC Listings -->
+    <div>
+      <h2 class="text-xl font-semibold mb-2">Available ECs</h2>
+      <div id="posts" class="space-y-4"></div>
     </div>
   </div>
 
@@ -72,93 +47,86 @@
       apiKey: "AIzaSyBcP87lbBOJ9sNR-PF4ceY-GKAKKXFLOdk",
       authDomain: "course-swap-5dcef.firebaseapp.com",
       projectId: "course-swap-5dcef",
-      storageBucket: "course-swap-5dcef.firebasestorage.app",
+      storageBucket: "course-swap-5dcef.appspot.com",
       messagingSenderId: "249900482208",
       appId: "1:249900482208:web:ccc6b44c127c2402afd3c5",
-      measurementId: "G-H3SZZ4H1YX"
+      measurementId: "G-H3SZZ4H1YX",
+      databaseURL: "https://course-swap-5dcef-default-rtdb.firebaseio.com/"
     };
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
 
-    function register() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(() => {
-          document.getElementById('auth-message').textContent = "Registered successfully!";
-          document.getElementById('auth-section').classList.add('hidden');
-          document.getElementById('profile-section').classList.remove('hidden');
-        })
-        .catch(error => document.getElementById('auth-message').textContent = error.message);
-    }
+    const authStatus = document.getElementById("auth-status");
+    const postSection = document.getElementById("post-section");
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        authStatus.textContent = `Logged in as ${user.email}`;
+        postSection.classList.remove("hidden");
+      } else {
+        authStatus.textContent = "Not logged in";
+        postSection.classList.add("hidden");
+      }
+    });
 
     function login() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
       auth.signInWithEmailAndPassword(email, password)
-        .then(userCredential => {
-          document.getElementById('auth-message').textContent = "Logged in!";
-          document.getElementById('auth-section').classList.add('hidden');
-          document.getElementById('profile-section').classList.remove('hidden');
-          loadProjects();
-        })
-        .catch(error => document.getElementById('auth-message').textContent = error.message);
+        .catch(error => alert(error.message));
     }
 
-    function saveProfile() {
-      const user = auth.currentUser;
-      const location = document.getElementById('location').value;
-      const interests = Array.from(document.getElementById('interests').selectedOptions).map(opt => opt.value);
-      db.ref('profiles/' + user.uid).set({ location, interests })
-        .then(() => {
-          document.getElementById('profile-section').classList.add('hidden');
-          document.getElementById('post-section').classList.remove('hidden');
-          loadProjects();
-        });
+    function register() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .catch(error => alert(error.message));
     }
 
-    function postProject() {
+    function logout() {
+      auth.signOut();
+    }
+
+    function postEC() {
+      const title = document.getElementById("title").value;
+      const description = document.getElementById("description").value;
+      const location = document.getElementById("location").value;
+      const interest = document.getElementById("interest").value;
       const user = auth.currentUser;
-      const title = document.getElementById('project-title').value;
-      const location = document.getElementById('project-location').value;
-      const type = document.getElementById('project-type').value;
-      const capacity = document.getElementById('max-capacity').value;
-      const postRef = db.ref('projects').push();
+
+      if (!user) return alert("You must be logged in to post.");
+
+      const postRef = db.ref("posts").push();
       postRef.set({
-        owner: user.uid,
+        user: user.email,
         title,
+        description,
         location,
-        type,
-        capacity,
-        participants: []
+        interest,
+        timestamp: Date.now()
       });
-      alert("Project posted!");
     }
 
-    function loadProjects() {
-      const user = auth.currentUser;
-      db.ref('profiles/' + user.uid).once('value').then(snapshot => {
-        const profile = snapshot.val();
-        db.ref('projects').once('value').then(projectsSnap => {
-          const list = document.getElementById('project-display');
-          list.innerHTML = '';
-          projectsSnap.forEach(projectSnap => {
-            const proj = projectSnap.val();
-            if (profile.interests.includes(proj.type) && profile.location === proj.location) {
-              const li = document.createElement('li');
-              li.textContent = `${proj.title} [${proj.type}] - Capacity: ${proj.capacity}`;
-              list.appendChild(li);
-            }
-          });
-        });
+    db.ref("posts").on("value", snapshot => {
+      const postsContainer = document.getElementById("posts");
+      postsContainer.innerHTML = "";
+      snapshot.forEach(child => {
+        const post = child.val();
+        const postDiv = document.createElement("div");
+        postDiv.className = "bg-white p-4 rounded shadow";
+        postDiv.innerHTML = `
+          <h3 class="text-lg font-bold">${post.title}</h3>
+          <p class="text-sm text-gray-600">${post.user}</p>
+          <p>${post.description}</p>
+          <p class="text-sm">📍 ${post.location} | 🏷️ ${post.interest}</p>
+        `;
+        postsContainer.appendChild(postDiv);
       });
-    }
+    });
   </script>
 </body>
-
 </html>
-
 
 
