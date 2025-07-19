@@ -49,6 +49,7 @@
         <option>Competition</option><option>Internship</option><option>Volunteering</option>
         <option>Online Course</option><option>Workshop</option><option>Club</option>
       </select>
+      <input id="telegram" class="form-control mt-2" placeholder="Telegram Username (e.g. @myusername)" />
       <input id="title" class="form-control mt-2" placeholder="Title" />
       <textarea id="desc" class="form-control mt-2" placeholder="Description"></textarea>
       <button id="submitBtn" class="btn btn-warning mt-2">Post</button>
@@ -150,6 +151,7 @@
       const type = document.getElementById('type').value;
       const title = document.getElementById('title').value;
       const desc = document.getElementById('desc').value;
+      const telegram = document.getElementById("telegram").value.trim();
 
       if (!title || !desc || !loc || !field || !type) return alert('Fill all fields');
 
