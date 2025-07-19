@@ -30,29 +30,78 @@
 
     <!-- Post Form -->
     <div id="post-section" class="hide">
-      <h3 class="mt-4">Create an EC Listing</h3>
-      <select id="location" class="form-control">
-        <option disabled selected>Choose location</option>
-        <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
-        <option>Samarkand</option><option>Bukhara</option><option>Namangan</option>
-        <option>Khorezm</option><option>Karakalpakstan</option><option>Jizzakh</option>
-        <option>Kashkadarya</option><option>Surkhandarya</option><option>Syrdarya</option>
-        <option>Navoi</option><option>Gulistan</option>
-      </select>
-      <select id="field" class="form-control mt-2">
-        <option disabled selected>Choose field of EC</option>
-        <option>STEM</option><option>Business</option><option>Art</option>
-        <option>Leadership</option><option>Debate</option><option>Writing</option>
-      </select>
-      <select id="type" class="form-control mt-2">
-        <option disabled selected>Choose type of EC</option>
-        <option>Competition</option><option>Internship</option><option>Volunteering</option>
-        <option>Online Course</option><option>Workshop</option><option>Club</option>
-      </select>
-      <input id="title" class="form-control mt-2" placeholder="Title" />
-      <textarea id="desc" class="form-control mt-2" placeholder="Description"></textarea>
-      <button id="submitBtn" class="btn btn-warning mt-2">Post</button>
+  <h3 class="mt-4">Create an EC Listing</h3>
+  <select id="location" class="form-control">
+    <option disabled selected>Choose location</option>
+    <!-- [locations] -->
+  </select>
+  <select id="field" class="form-control mt-2">
+    <option disabled selected>Choose field of EC</option>
+    <!-- [fields] -->
+  </select>
+  <select id="type" class="form-control mt-2">
+    <option disabled selected>Choose type of EC</option>
+    <!-- [types] -->
+  </select>
+  <input id="title" class="form-control mt-2" placeholder="Title" />
+  <textarea id="desc" class="form-control mt-2" placeholder="Description"></textarea>
+  <button id="submitBtn" class="btn btn-warning mt-2">Post</button>
+</div>
+
+<!-- ✅ Toast -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+  <div id="postToast" class="toast align-items-center text-white bg-success border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body">
+        Post submitted successfully!
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="hideToast()"></button>
     </div>
+  </div>
+</div>
+
+<!-- ... [Filter Section and Listings remain unchanged] -->
+
+<script>
+  // ... [Firebase setup and other code remains unchanged]
+
+  function showToast() {
+    const toast = document.getElementById("postToast");
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+  }
+
+  function hideToast() {
+    const toast = document.getElementById("postToast");
+    const bsToast = bootstrap.Toast.getInstance(toast);
+    if (bsToast) bsToast.hide();
+  }
+
+  submitBtn.onclick = () => {
+    const loc = document.getElementById('location').value;
+    const field = document.getElementById('field').value;
+    const type = document.getElementById('type').value;
+    const title = document.getElementById('title').value;
+    const desc = document.getElementById('desc').value;
+
+    if (!title || !desc || !loc || !field || !type) return alert('Fill all fields');
+
+    const newPostRef = db.ref('posts').push();
+    newPostRef.set({
+      title,
+      desc,
+      location: loc,
+      field,
+      type,
+      uid: auth.currentUser.uid
+    }).then(() => {
+      showToast(); // ✅ Show confirmation toast
+    });
+  };
+
+  // ... [filterBtn and other logic remains unchanged]
+</script>
+
 
     <!-- Filter Section -->
     <div id="filter-section" class="mt-4 hide">
