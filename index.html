@@ -3,116 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Discover extracurricular projects and post your own. Tailored to your interests and location in Uzbekistan." />
-  <meta name="keywords" content="extracurricular, Uzbekistan, volunteering, clubs, student projects, ECs, activities" />
-  <meta name="author" content="extracurricularsuzbekistan.online" />
-  <title>Extracurriculars Uzbekistan</title>
-
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f4f4;
-      color: #333;
-    }
-
-    header {
-      background-color: #4CAF50;
-      padding: 1rem;
-      color: white;
-      text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 2rem;
-    }
-
-    main {
-      padding: 2rem;
-      max-width: 900px;
-      margin: auto;
-    }
-
-    section {
-      background: white;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    input, select, button {
-      font-size: 1rem;
-      padding: 0.5rem;
-      margin-top: 0.5rem;
-      width: 100%;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      margin-bottom: 1rem;
-    }
-
-    button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    footer {
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.9rem;
-      color: #777;
-      background-color: #eee;
-      margin-top: 2rem;
-    }
-  </style>
-</head>
-
-<body>
-  <header>
-    <h1>Extracurriculars Uzbekistan</h1>
-    <p>Find or post student projects across Uzbekistan</p>
-  </header>
-
-  <main>
-    <section>
-      <h2>Login</h2>
-      <input type="email" id="loginEmail" placeholder="Email">
-      <input type="password" id="loginPassword" placeholder="Password">
-      <button onclick="loginUser()">Login</button>
-    </section>
-
-    <section>
-      <h2>Register</h2>
-      <input type="email" id="registerEmail" placeholder="Email">
-      <input type="password" id="registerPassword" placeholder="Password">
-      <button onclick="registerUser()">Register</button>
-    </section>
-
-    <section id="userSection" style="display:none">
-      <h2>Welcome, <span id="userEmail"></span>!</h2>
-      <button onclick="logoutUser()">Logout</button>
-    </section>
-  </main>
-
-  <footer>
-    &copy; 2025 ExtracurricularsUzbekistan.online. All rights reserved.
-  </footer>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
-
+  <title>EC Portal</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBcP87lbBOJ9sNR-PF4ceY-GKAKKXFLOdk",
@@ -123,39 +17,173 @@
       appId: "1:249900482208:web:ccc6b44c127c2402afd3c5",
       measurementId: "G-H3SZZ4H1YX"
     };
-
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db = firebase.database();
+  </script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .hidden { display: none; }
+    input, select { display: block; margin: 10px 0; }
+    .card { padding: 10px; border: 1px solid #ccc; margin: 10px 0; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>EC Platform</h1>
 
-    function loginUser() {
-      const email = document.getElementById("loginEmail").value;
-      const password = document.getElementById("loginPassword").value;
-      auth.signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          const user = userCredential.user;
-          document.getElementById("userEmail").textContent = user.email;
-          document.getElementById("userSection").style.display = 'block';
-        })
-        .catch((error) => alert("Login failed: " + error.message));
+  <!-- Auth -->
+  <div id="auth-section">
+    <h2>Register</h2>
+    <input type="email" id="reg-email" placeholder="Email" />
+    <input type="password" id="reg-password" placeholder="Password" />
+    <button onclick="register()">Register</button>
+
+    <h2>Login</h2>
+    <input type="email" id="log-email" placeholder="Email" />
+    <input type="password" id="log-password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+  </div>
+
+  <!-- Profile Setup -->
+  <div id="profile-section" class="hidden">
+    <h2>Profile Setup</h2>
+    <input id="name" placeholder="Full Name" />
+    <input id="grade" placeholder="Grade" />
+    <select id="city">
+      <option value="Andijan">Andijan</option>
+      <option value="Tashkent">Tashkent</option>
+    </select>
+    <select id="interests">
+      <option value="Tech">Tech</option>
+      <option value="Arts">Arts</option>
+    </select>
+    <button onclick="saveProfile()">Save Profile</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <!-- Post EC -->
+  <div id="post-section" class="hidden">
+    <h2>Post EC</h2>
+    <input id="title" placeholder="Title" />
+    <select id="post-city">
+      <option value="Andijan">Andijan</option>
+      <option value="Tashkent">Tashkent</option>
+    </select>
+    <select id="post-theme">
+      <option value="Tech">Tech</option>
+      <option value="Arts">Arts</option>
+    </select>
+    <select id="post-type">
+      <option value="Internship">Internship</option>
+      <option value="Course">Course</option>
+    </select>
+    <input type="number" id="capacity" placeholder="Capacity" />
+    <button onclick="postEC()">Submit EC</button>
+  </div>
+
+  <!-- View ECs -->
+  <div id="explore-section" class="hidden">
+    <h2>Explore ECs</h2>
+    <select id="filter-city">
+      <option value="">All Cities</option>
+      <option value="Andijan">Andijan</option>
+      <option value="Tashkent">Tashkent</option>
+    </select>
+    <select id="filter-theme">
+      <option value="">All Themes</option>
+      <option value="Tech">Tech</option>
+      <option value="Arts">Arts</option>
+    </select>
+    <button onclick="filterECs()">Filter</button>
+
+    <div id="ec-list"></div>
+  </div>
+
+  <script>
+    let currentUser = null;
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('profile-section').classList.remove('hidden');
+        document.getElementById('post-section').classList.remove('hidden');
+        document.getElementById('explore-section').classList.remove('hidden');
+      }
+    });
+
+    function register() {
+      const email = document.getElementById("reg-email").value;
+      const pass = document.getElementById("reg-password").value;
+      auth.createUserWithEmailAndPassword(email, pass).then(() => alert("Registered"));
     }
 
-    function registerUser() {
-      const email = document.getElementById("registerEmail").value;
-      const password = document.getElementById("registerPassword").value;
-      auth.createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          alert("Registration successful!");
-        })
-        .catch((error) => alert("Registration failed: " + error.message));
+    function login() {
+      const email = document.getElementById("log-email").value;
+      const pass = document.getElementById("log-password").value;
+      auth.signInWithEmailAndPassword(email, pass).then(() => alert("Logged in"));
     }
 
-    function logoutUser() {
-      auth.signOut().then(() => {
-        document.getElementById("userSection").style.display = 'none';
-        alert("Logged out successfully");
+    function logout() {
+      auth.signOut();
+      location.reload();
+    }
+
+    function saveProfile() {
+      const name = document.getElementById("name").value;
+      const grade = document.getElementById("grade").value;
+      const city = document.getElementById("city").value;
+      const interests = document.getElementById("interests").value;
+
+      db.ref("users/" + currentUser.uid).set({ name, grade, city, interests });
+      alert("Profile saved");
+    }
+
+    function postEC() {
+      const ec = {
+        uid: currentUser.uid,
+        title: document.getElementById("title").value,
+        city: document.getElementById("post-city").value,
+        theme: document.getElementById("post-theme").value,
+        type: document.getElementById("post-type").value,
+        capacity: parseInt(document.getElementById("capacity").value),
+        joinedUsers: {}
+      };
+      db.ref("projects").push(ec).then(() => alert("EC Posted"));
+    }
+
+    function filterECs() {
+      const city = document.getElementById("filter-city").value;
+      const theme = document.getElementById("filter-theme").value;
+      const list = document.getElementById("ec-list");
+      list.innerHTML = "";
+
+      db.ref("projects").once("value", snap => {
+        snap.forEach(child => {
+          const d = child.val();
+          if ((!city || d.city === city) && (!theme || d.theme === theme)) {
+            const div = document.createElement("div");
+            div.className = "card";
+            div.innerHTML = `
+              <strong>${d.title}</strong>
+              <p>City: ${d.city}</p>
+              <p>Theme: ${d.theme}</p>
+              <p>Type: ${d.type}</p>
+              <p>Capacity: ${d.capacity}</p>
+              <p>Joined: ${d.joinedUsers ? Object.keys(d.joinedUsers).length : 0}</p>
+              <button onclick="joinEC('${child.key}')">Join</button>
+            `;
+            list.appendChild(div);
+          }
+        });
       });
+    }
+
+    function joinEC(id) {
+      db.ref(`projects/${id}/joinedUsers/${currentUser.uid}`).set(true).then(() => alert("Joined"));
     }
   </script>
 </body>
 </html>
+
 
