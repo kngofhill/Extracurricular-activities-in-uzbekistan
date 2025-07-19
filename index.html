@@ -113,6 +113,7 @@
     const postSection = document.getElementById('post-section');
     const filterSection = document.getElementById('filter-section');
     const listings = document.getElementById('listings');
+    
 
     function showToast() {
       const toast = document.getElementById("postToast");
@@ -150,25 +151,46 @@
       const field = document.getElementById('field').value;
       const type = document.getElementById('type').value;
       const title = document.getElementById('title').value;
-      const desc = document.getElementById('desc').value;
-      const telegram = document.getElementById("telegram").value.trim();
+      const postData = {
+  title,
+  description,
+  location,
+  field,
+  type,
+  telegram,
+  userId: user.uid,
+  timestamp: Date.now()
+};
 
-      if (!title || !desc || !loc || !field || !type) return alert('Fill all fields');
+submitBtn.onclick = async function () {
+  const title = document.getElementById("title").value.trim();
+  const description = document.getElementById("desc").value.trim();
+  const location = document.getElementById("location").value;
+  const field = document.getElementById("field").value;
+  const type = document.getElementById("type").value;
 
-      const newPostRef = db.ref('posts').push();
-      newPostRef.set({
-        title,
-        desc,
-        location: loc,
-        field,
-        type,
-        uid: auth.currentUser.uid
-      }).then(() => {
-        showToast();
-      }).catch(err => {
-        alert("Failed to post: " + err.message);
-      });
-    };
+  // ✅ ADD THIS LINE
+  const telegram = document.getElementById("telegram").value.trim();
+
+  const postData = {
+    title,
+    description,
+    location,
+    field,
+    type,
+    telegram, // ✅ Include this
+    userId: user.uid,
+    timestamp: Date.now()
+  };
+
+  try {
+    await push(ref(database, "posts"), postData);
+    showToast("Posted successfully");
+  } catch (err) {
+    showToast("Failed to post: " + err.message, true);
+  }
+};
+
 
     filterBtn.onclick = () => {
       const fLoc = document.getElementById('filter-location').value;
@@ -185,10 +207,16 @@
                   <h5>${post.title}</h5>
                   <p>${post.desc}</p>
                   <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
+          
                 </div>
               </div>`;
+          const telegramEl = document.createElement("p");
+telegramEl.innerHTML = `<strong>Telegram:</strong> ${post.telegram || "N/A"}`;
+card.querySelector(".card-body").appendChild(telegramEl);
+
           }
         });
+
       });
     };
   </script>
