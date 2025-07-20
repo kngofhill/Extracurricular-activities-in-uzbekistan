@@ -255,15 +255,14 @@ const postECBtn = document.getElementById('postECBtn');
 
 auth.onAuthStateChanged(user => {
   if (user) {
-    postSection.classList.remove('hide');
+    postECBtn.classList.remove('hide');
     logoutBtn.classList.remove('hide');
-
   } else {
-    postSection.classList.add('hide');
+    postECBtn.classList.add('hide');
     logoutBtn.classList.add('hide');
-
   }
 });
+
 // Load all listings by default
 filterBtn.onclick(); // triggers full fetch
 
