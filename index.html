@@ -51,32 +51,38 @@
     <div id="listings" class="mt-4"></div>
   </div>
     <!-- Post Form -->
-    <div id="post-section" class="hide">
-      <h3 class="mt-4">Create an EC Listing</h3>
-      <button class="btn btn-success my-3" onclick="showCreateForm()">I want to post an EC opportunity</button>
-      <select id="location" class="form-control">
-        <option disabled selected>Choose location</option>
-        <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
-        <option>Samarkand</option><option>Bukhara</option><option>Namangan</option>
-        <option>Khorezm</option><option>Karakalpakstan</option><option>Jizzakh</option>
-        <option>Kashkadarya</option><option>Surkhandarya</option><option>Syrdarya</option>
-        <option>Navoi</option><option>Gulistan</option>
-      </select>
-      <select id="field" class="form-control mt-2">
-        <option disabled selected>Choose field of EC</option>
-        <option>STEM</option><option>Business</option><option>Art</option>
-        <option>Leadership</option><option>Debate</option><option>Writing</option>
-      </select>
-      <select id="type" class="form-control mt-2">
-        <option disabled selected>Choose type of EC</option>
-        <option>Competition</option><option>Internship</option><option>Volunteering</option>
-        <option>Online Course</option><option>Workshop</option><option>Club</option>
-      </select>
-      <input id="telegram" class="form-control mt-2" placeholder="Telegram Username (e.g. @myusername)" />
-      <input id="title" class="form-control mt-2" placeholder="Title" />
-      <textarea id="desc" class="form-control mt-2" placeholder="Description"></textarea>
-      <button id="submitBtn" class="btn btn-warning mt-2">Post</button>
-    </div>
+    <!-- Post Section (button) -->
+<div id="post-section" class="hide">
+  <h3 class="mt-4">Create an EC Listing</h3>
+  <button class="btn btn-success my-3" onclick="showCreateForm()">I want to post an EC opportunity</button>
+
+  <!-- This form will be hidden initially -->
+  <div id="createListingSection" style="display: none;">
+    <select id="location" class="form-control">
+      <option disabled selected>Choose location</option>
+      <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
+      <option>Samarkand</option><option>Bukhara</option><option>Namangan</option>
+      <option>Khorezm</option><option>Karakalpakstan</option><option>Jizzakh</option>
+      <option>Kashkadarya</option><option>Surkhandarya</option><option>Syrdarya</option>
+      <option>Navoi</option><option>Gulistan</option>
+    </select>
+    <select id="field" class="form-control mt-2">
+      <option disabled selected>Choose field of EC</option>
+      <option>STEM</option><option>Business</option><option>Art</option>
+      <option>Leadership</option><option>Debate</option><option>Writing</option>
+    </select>
+    <select id="type" class="form-control mt-2">
+      <option disabled selected>Choose type of EC</option>
+      <option>Competition</option><option>Internship</option><option>Volunteering</option>
+      <option>Online Course</option><option>Workshop</option><option>Club</option>
+    </select>
+    <input id="telegram" class="form-control mt-2" placeholder="Telegram Username (e.g. @myusername)" />
+    <input id="title" class="form-control mt-2" placeholder="Title" />
+    <textarea id="desc" class="form-control mt-2" placeholder="Description"></textarea>
+    <button id="submitBtn" class="btn btn-warning mt-2">Post</button>
+  </div>
+</div>
+
 
     <!-- Toast Notification -->
     <div id="postToast" class="toast position-fixed bottom-0 end-0 m-3 align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -91,9 +97,12 @@
   
 
 <script>
-  function showCreateForm() {
-    document.getElementById("createListingSection").style.display = "block";
-  }
+function showCreateForm() {
+  const section = document.getElementById("createListingSection");
+  section.style.display = "block";
+  section.scrollIntoView({ behavior: "smooth" });
+}
+
   const firebaseConfig = {
     apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
     authDomain: "extracurricularsuzbekistan.firebaseapp.com",
