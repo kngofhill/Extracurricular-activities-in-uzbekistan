@@ -15,30 +15,73 @@
     body { padding: 2rem; background-color: #f0f8ff; }
     .card { margin-top: 1rem; }
     .hide { display: none; }
+    #listings .card {
+  margin-bottom: 1rem;
+}
+.modal-content {
+  border-radius: 1rem;
+  border: none;
+}
+
   </style>
 </head>
 <body>
   <div class="container">
     <!--Auth buttons-->
-<div class="d-flex justify-content-end gap-2 mb-3">
+<!--Auth buttons-->
+<div class="d-flex justify-content-center gap-2 my-4">
   <button class="btn btn-outline-primary" onclick="showAuth('login')">Log In</button>
   <button class="btn btn-outline-secondary" onclick="showAuth('register')">Register</button>
+  <button id="logoutBtn" class="btn btn-danger hide" onclick="auth.signOut()">Log Out</button>
 </div>
+
 
     <h1 class="text-center">EC Platform Uzbekistan</h1>
 
-    <!-- Auth Section -->
-    <!-- 🔒 AUTH SECTION - HIDDEN BY DEFAULT -->
-<section id="authSection" style="display: none;">
-    <div id="auth-section">
-      <h3>Register / Login</h3>
-      <input id="email" class="form-control" placeholder="Email" type="email">
-      <input id="password" class="form-control mt-2" placeholder="Password" type="password">
-      <button id="registerBtn" class="btn btn-primary mt-2">Register</button>
-      <button id="loginBtn" class="btn btn-success mt-2">Login</button>
-      <button id="logoutBtn" class="btn btn-danger mt-2 hide">Logout</button>
+
+<!-- Auth Modal -->
+<div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-lg rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title" id="authModalLabel">Log In or Register</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Login Form -->
+        <form id="loginForm" style="display: none;">
+          <div class="mb-3">
+            <input type="email" class="form-control" id="loginEmail" placeholder="Email" required />
+          </div>
+          <div class="mb-3">
+            <input type="password" class="form-control" id="loginPassword" placeholder="Password" required />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Log In</button>
+          <p class="text-center mt-2">
+            Don't have an account?
+            <a href="#" onclick="showAuth('register')">Register</a>
+          </p>
+        </form>
+
+        <!-- Register Form -->
+        <form id="registerForm" style="display: none;">
+          <div class="mb-3">
+            <input type="email" class="form-control" id="registerEmail" placeholder="Email" required />
+          </div>
+          <div class="mb-3">
+            <input type="password" class="form-control" id="registerPassword" placeholder="Password" required />
+          </div>
+          <button type="submit" class="btn btn-secondary w-100">Register</button>
+          <p class="text-center mt-2">
+            Already have an account?
+            <a href="#" onclick="showAuth('login')">Log In</a>
+          </p>
+        </form>
+      </div>
     </div>
-</section>
+  </div>
+</div>
+
   <!-- Filter Section -->
 <div id="filter-section" class="mt-4">
   <h3>Filter Listings</h3>
@@ -62,7 +105,11 @@
 
 
     <!-- Listings -->
-    <div id="listings" class="mt-4"></div>
+    <div id="listings" class="mt-4">
+
+<button id="postECBtn" class="btn btn-success my-3" onclick="showCreateForm()">I want to post an EC opportunity</button>
+
+    </div>
   </div>
     <!-- Post Form -->
     <!-- Post Section (button) -->
@@ -112,19 +159,25 @@
   
 
 <script>
-function showAuth(mode) {
-  const authSection = document.getElementById("authSection");
-  authSection.style.display = "block";
-  authSection.scrollIntoView({ behavior: "smooth" });
 
-  if (mode === "login") {
-    const loginEmail = document.getElementById("loginEmail");
-    if (loginEmail) loginEmail.focus();
-  } else if (mode === "register") {
-    const registerEmail = document.getElementById("registerEmail");
-    if (registerEmail) registerEmail.focus();
+function showAuth(type) {
+  const loginForm = document.getElementById("loginForm");
+  const registerForm = document.getElementById("registerForm");
+
+  if (type === "login") {
+    loginForm.style.display = "block";
+    registerForm.style.display = "none";
+    document.getElementById("authModalLabel").innerText = "Log In";
+  } else {
+    loginForm.style.display = "none";
+    registerForm.style.display = "block";
+    document.getElementById("authModalLabel").innerText = "Register";
   }
+
+  const modal = new bootstrap.Modal(document.getElementById("authModal"));
+  modal.show();
 }
+
 
 function showCreateForm() {
   const user = auth.currentUser;
@@ -153,15 +206,14 @@ function showCreateForm() {
   const auth = firebase.auth();
   const db = firebase.database();
 
-  const email = document.getElementById('email');
-  const password = document.getElementById('password');
-  const registerBtn = document.getElementById('registerBtn');
-  const loginBtn = document.getElementById('loginBtn');
+// Auth fields inside the modal
+  const loginEmail = document.getElementById('loginEmail');
+  const loginPassword = document.getElementById('loginPassword');
+  const registerEmail = document.getElementById('registerEmail');
+  const registerPassword = document.getElementById('registerPassword');
   const logoutBtn = document.getElementById('logoutBtn');
   const submitBtn = document.getElementById('submitBtn');
   const filterBtn = document.getElementById('filterBtn');
-
-  const authSection = document.getElementById('auth-section');
   const postSection = document.getElementById('post-section');
   const filterSection = document.getElementById('filter-section');
   const listings = document.getElementById('listings');
@@ -171,40 +223,24 @@ function showCreateForm() {
     toast.show();
   }
 
-  // REGISTER
-  registerBtn.onclick = () => {
-    auth.createUserWithEmailAndPassword(email.value, password.value)
-      .then(() => alert('Registered successfully'))
-      .catch(e => alert(e.message));
-  };
-
-  // LOGIN
-  loginBtn.onclick = () => {
-    auth.signInWithEmailAndPassword(email.value, password.value)
-      .catch(e => alert(e.message));
-  };
-
-  // LOGOUT
-  logoutBtn.onclick = () => {
-    auth.signOut();
-  };
+ 
 
   // AUTH STATE LISTENER
+const postECBtn = document.getElementById('postECBtn');
+
 auth.onAuthStateChanged(user => {
   if (user) {
-    // Hide auth section and show post option
-    authSection.style.display = "none";
     postSection.classList.remove('hide');
     logoutBtn.classList.remove('hide');
+    postECBtn.disabled = false;
   } else {
-    // Don't show auth section unless explicitly triggered
-    authSection.style.display = "none";
     postSection.classList.add('hide');
     logoutBtn.classList.add('hide');
+    postECBtn.disabled = true;
   }
-  // Filters and listings should always be visible
-  filterSection.classList.remove('hide');
 });
+
+
 
 
 
@@ -230,14 +266,11 @@ auth.onAuthStateChanged(user => {
       uid: auth.currentUser.uid
     }).then(() => {
       showToast();
+      document.getElementById("createListingSection").style.display = "none"; 
     }).catch(err => {
       alert("Failed to post: " + err.message);
     });
   };
-#authSection {
-  max-width: 400px;
-  margin: auto;
-}
 
   // FILTER POSTS
   filterBtn.onclick = () => {
@@ -267,6 +300,30 @@ auth.onAuthStateChanged(user => {
       }
     });
   };
+  // REGISTER
+// REGISTER
+document.getElementById("registerForm").onsubmit = (e) => {
+  e.preventDefault();
+  auth.createUserWithEmailAndPassword(registerEmail.value, registerPassword.value)
+    .then(() => {
+      alert('Registered successfully');
+      bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+    })
+    .catch(e => alert(e.message));
+};
+
+// LOGIN
+document.getElementById("loginForm").onsubmit = (e) => {
+  e.preventDefault();
+  auth.signInWithEmailAndPassword(loginEmail.value, loginPassword.value)
+    .then(() => {
+      alert('Signed in successfully');
+      bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+    })
+    .catch(e => alert(e.message));
+};
+
+
 </script>
 
 </body>
