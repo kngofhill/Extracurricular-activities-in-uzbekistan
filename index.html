@@ -254,11 +254,12 @@ function showCreateForm() {
 const postECBtn = document.getElementById('postECBtn');
 
 auth.onAuthStateChanged(user => {
+  // Always show the post button
+  postECBtn.classList.remove('hide');
+  // Only show logout for logged in users
   if (user) {
-    postECBtn.classList.remove('hide');
     logoutBtn.classList.remove('hide');
   } else {
-    postECBtn.classList.add('hide');
     logoutBtn.classList.add('hide');
   }
 });
