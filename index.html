@@ -89,119 +89,130 @@
 
   
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
-      authDomain: "extracurricularsuzbekistan.firebaseapp.com",
-      databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com",
-      projectId: "extracurricularsuzbekistan",
-      storageBucket: "extracurricularsuzbekistan.firebasestorage.app",
-      messagingSenderId: "555521664728",
-      appId: "1:555521664728:web:bf72cb8384be98ff7b99ad",
-      measurementId: "G-Z53076ZBCJ"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
+    authDomain: "extracurricularsuzbekistan.firebaseapp.com",
+    databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com",
+    projectId: "extracurricularsuzbekistan",
+    storageBucket: "extracurricularsuzbekistan.firebasestorage.app",
+    messagingSenderId: "555521664728",
+    appId: "1:555521664728:web:bf72cb8384be98ff7b99ad",
+    measurementId: "G-Z53076ZBCJ"
+  };
 
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-    const registerBtn = document.getElementById('registerBtn');
-    const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const submitBtn = document.getElementById('submitBtn');
-    const filterBtn = document.getElementById('filterBtn');
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
 
-    const authSection = document.getElementById('auth-section');
-    const postSection = document.getElementById('post-section');
-    const filterSection = document.getElementById('filter-section');
-    const listings = document.getElementById('listings');
+  const email = document.getElementById('email');
+  const password = document.getElementById('password');
+  const registerBtn = document.getElementById('registerBtn');
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const submitBtn = document.getElementById('submitBtn');
+  const filterBtn = document.getElementById('filterBtn');
 
-    function showToast() {
-      const toast = document.getElementById("postToast");
-      const bsToast = new bootstrap.Toast(toast);
-      bsToast.show();
-    }
+  const authSection = document.getElementById('auth-section');
+  const postSection = document.getElementById('post-section');
+  const filterSection = document.getElementById('filter-section');
+  const listings = document.getElementById('listings');
 
-    registerBtn.onclick = () => {
-      auth.createUserWithEmailAndPassword(email.value, password.value)
-        .then(() => alert('Registered successfully'))
-        .catch(e => alert(e.message));
-    };
+  function showToast() {
+    const toast = new bootstrap.Toast(document.getElementById("postToast"));
+    toast.show();
+  }
 
-    loginBtn.onclick = () => {
-      auth.signInWithEmailAndPassword(email.value, password.value)
-        .then(() => {
-          authSection.classList.add('hide');
-          postSection.classList.remove('hide');
-          filterSection.classList.remove('hide');
-          logoutBtn.classList.remove('hide');
-        })
-        .catch(e => alert(e.message));
-    };
+  // REGISTER
+  registerBtn.onclick = () => {
+    auth.createUserWithEmailAndPassword(email.value, password.value)
+      .then(() => alert('Registered successfully'))
+      .catch(e => alert(e.message));
+  };
 
-    logoutBtn.onclick = () => {
-      auth.signOut();
+  // LOGIN
+  loginBtn.onclick = () => {
+    auth.signInWithEmailAndPassword(email.value, password.value)
+      .catch(e => alert(e.message));
+  };
+
+  // LOGOUT
+  logoutBtn.onclick = () => {
+    auth.signOut();
+  };
+
+  // AUTH STATE LISTENER
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      authSection.classList.add('hide');
+      postSection.classList.remove('hide');
+      filterSection.classList.remove('hide');
+      logoutBtn.classList.remove('hide');
+    } else {
       authSection.classList.remove('hide');
       postSection.classList.add('hide');
       filterSection.classList.add('hide');
       logoutBtn.classList.add('hide');
-    };
-
-    submitBtn.onclick = () => {
-      const loc = document.getElementById('location').value;
-      const field = document.getElementById('field').value;
-      const type = document.getElementById('type').value;
-      const title = document.getElementById('title').value;
-      const desc = document.getElementById('desc').value;
-      const telegram = document.getElementById("telegram").value.trim();
-
-      if (!title || !desc || !loc || !field || !type) return alert('Fill all fields');
-
-      const newPostRef = db.ref('posts').push();
-      newPostRef.set({
-        title,
-        desc,
-        location: loc,
-        field,
-        type,
-        telegram,
-        uid: auth.currentUser.uid
-      }).then(() => {
-        showToast();
-      }).catch(err => {
-        alert("Failed to post: " + err.message);
-      });
-    };
-
-    filterBtn.onclick = () => {
-      const fLoc = document.getElementById('filter-location').value;
-      const fField = document.getElementById('filter-field').value;
-
-      db.ref('posts').once('value', snapshot => {
-        listings.innerHTML = '';
-  let found = false;
-  snapshot.forEach(child => {
-    const post = child.val();
-    if ((fLoc === '' || post.location === fLoc) && (fField === '' || post.field === fField)) {
-      found = true;
-      listings.innerHTML += `
-        <div class="card">
-          <div class="card-body">
-            <h5>${post.title}</h5>
-            <p>${post.desc}</p>
-            <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
-            <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
-          </div>
-        </div>`;
     }
   });
-  if (!found) {
-    listings.innerHTML = `<p class="text-muted mt-3">No opportunities match your filters. Please try again later.</p>`;
-  }
 
-    };
-  </script>
+  // SUBMIT POST
+  submitBtn.onclick = () => {
+    const loc = document.getElementById('location').value;
+    const field = document.getElementById('field').value;
+    const type = document.getElementById('type').value;
+    const title = document.getElementById('title').value;
+    const desc = document.getElementById('desc').value;
+    const telegram = document.getElementById("telegram").value.trim();
+
+    if (!title || !desc || !loc || !field || !type) return alert('Fill all fields');
+
+    const newPostRef = db.ref('posts').push();
+    newPostRef.set({
+      title,
+      desc,
+      location: loc,
+      field,
+      type,
+      telegram,
+      uid: auth.currentUser.uid
+    }).then(() => {
+      showToast();
+    }).catch(err => {
+      alert("Failed to post: " + err.message);
+    });
+  };
+
+  // FILTER POSTS
+  filterBtn.onclick = () => {
+    const fLoc = document.getElementById('filter-location').value;
+    const fField = document.getElementById('filter-field').value;
+
+    db.ref('posts').once('value', snapshot => {
+      listings.innerHTML = '';
+      let found = false;
+      snapshot.forEach(child => {
+        const post = child.val();
+        if ((fLoc === '' || post.location === fLoc) && (fField === '' || post.field === fField)) {
+          found = true;
+          listings.innerHTML += `
+            <div class="card">
+              <div class="card-body">
+                <h5>${post.title}</h5>
+                <p>${post.desc}</p>
+                <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
+                <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
+              </div>
+            </div>`;
+        }
+      });
+      if (!found) {
+        listings.innerHTML = `<p class="text-muted mt-3">No opportunities match your filters. Please try again later.</p>`;
+      }
+    });
+  };
+</script>
+
 </body>
 </html>
 
