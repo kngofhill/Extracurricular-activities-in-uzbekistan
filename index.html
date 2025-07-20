@@ -254,18 +254,18 @@ function showCreateForm() {
 const postECBtn = document.getElementById('postECBtn');
 
 auth.onAuthStateChanged(user => {
-  // Always show the post button
   postECBtn.classList.remove('hide');
-  // Only show logout for logged in users
+
   if (user) {
     logoutBtn.classList.remove('hide');
   } else {
     logoutBtn.classList.add('hide');
   }
+
+  // ✅ NOW we can safely load listings
+  filterBtn.onclick();
 });
 
-// Load all listings by default
-filterBtn.onclick(); // triggers full fetch
 
 
 
@@ -354,10 +354,17 @@ document.getElementById("loginForm").onsubmit = (e) => {
   auth.signInWithEmailAndPassword(loginEmail.value, loginPassword.value)
     .then(() => {
       alert('Signed in successfully');
+
+      // ✅ Close the modal
       bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+
+      // ✅ Scroll to "Post" button after successful login
+      document.getElementById("postECBtn").scrollIntoView({ behavior: "smooth" });
     })
     .catch(e => alert(e.message));
 };
+
+
 
 
 </script>
