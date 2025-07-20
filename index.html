@@ -1,3 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EC Platform Uzbekistan</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Qmcn6UMfNfO/6J4W4rQxFh1EQ9hNMiXqRUuGHCKFgTMeKZynRyCyH2vsbnu4sl/8" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-Qmcn6UMfNfO/6J4W4rQxFh1EQ9hNMiXqRUuGHCKFgTMeKZynRyCyH2vsbnu4sl/8" crossorigin="anonymous"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { padding: 2rem; background-color: #f0f8ff; }
+    .card { margin-top: 1rem; }
+    .hide { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center">EC Platform Uzbekistan</h1>
+
+    <!-- Auth Section -->
+    <div id="auth-section">
+      <h3>Register / Login</h3>
+      <input id="email" class="form-control" placeholder="Email" type="email">
+      <input id="password" class="form-control mt-2" placeholder="Password" type="password">
+      <button id="registerBtn" class="btn btn-primary mt-2">Register</button>
+      <button id="loginBtn" class="btn btn-success mt-2">Login</button>
+      <button id="logoutBtn" class="btn btn-danger mt-2 hide">Logout</button>
+    </div>
+
+    <!-- Post Form -->
+    <div id="post-section" class="hide">
+      <h3 class="mt-4">Create an EC Listing</h3>
+      <select id="location" class="form-control">
+        <option disabled selected>Choose location</option>
+        <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
+        <option>Samarkand</option><option>Bukhara</option><option>Namangan</option>
+        <option>Khorezm</option><option>Karakalpakstan</option><option>Jizzakh</option>
+        <option>Kashkadarya</option><option>Surkhandarya</option><option>Syrdarya</option>
+        <option>Navoi</option><option>Gulistan</option>
+      </select>
+      <select id="field" class="form-control mt-2">
+        <option disabled selected>Choose field of EC</option>
+        <option>STEM</option><option>Business</option><option>Art</option>
+        <option>Leadership</option><option>Debate</option><option>Writing</option>
+      </select>
+      <select id="type" class="form-control mt-2">
+        <option disabled selected>Choose type of EC</option>
+        <option>Competition</option><option>Internship</option><option>Volunteering</option>
+        <option>Online Course</option><option>Workshop</option><option>Club</option>
+      </select>
+      <input id="telegram" class="form-control mt-2" placeholder="Telegram Username (e.g. @myusername)" />
+      <input id="title" class="form-control mt-2" placeholder="Title" />
+      <textarea id="desc" class="form-control mt-2" placeholder="Description"></textarea>
+      <button id="submitBtn" class="btn btn-warning mt-2">Post</button>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="postToast" class="toast position-fixed bottom-0 end-0 m-3 align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          ✅ Post submitted successfully!
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div id="filter-section" class="mt-4 hide">
+      <h3>Filter Listings</h3>
+      <select id="filter-location" class="form-control">
+        <option value="">All Locations</option>
+        <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
+        <option>Samarkand</option><option>Bukhara</option><option>Namangan</option>
+        <option>Khorezm</option><option>Karakalpakstan</option><option>Jizzakh</option>
+        <option>Kashkadarya</option><option>Surkhandarya</option><option>Syrdarya</option>
+        <option>Navoi</option><option>Gulistan</option>
+      </select>
+      <select id="filter-field" class="form-control mt-2">
+        <option value="">All Fields</option>
+        <option>STEM</option><option>Business</option><option>Art</option>
+        <option>Leadership</option><option>Debate</option><option>Writing</option>
+      </select>
+      <button id="filterBtn" class="btn btn-info mt-2">Filter</button>
+    </div>
+
+    <!-- Listings -->
+    <div id="listings" class="mt-4"></div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
+      authDomain: "extracurricularsuzbekistan.firebaseapp.com",
+      databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com",
+      projectId: "extracurricularsuzbekistan",
+      storageBucket: "extracurricularsuzbekistan.firebasestorage.app",
+      messagingSenderId: "555521664728",
+      appId: "1:555521664728:web:bf72cb8384be98ff7b99ad",
+      measurementId: "G-Z53076ZBCJ"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const registerBtn = document.getElementById('registerBtn');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const filterBtn = document.getElementById('filterBtn');
+
+    const authSection = document.getElementById('auth-section');
+    const postSection = document.getElementById('post-section');
+    const filterSection = document.getElementById('filter-section');
+    const listings = document.getElementById('listings');
+
+    function showToast() {
+      const toast = document.getElementById("postToast");
+      const bsToast = new bootstrap.Toast(toast);
+      bsToast.show();
+    }
+
+    registerBtn.onclick = () => {
+      auth.createUserWithEmailAndPassword(email.value, password.value)
+        .then(() => alert('Registered successfully'))
+        .catch(e => alert(e.message));
+    };
+
+    loginBtn.onclick = () => {
+      auth.signInWithEmailAndPassword(email.value, password.value)
+        .then(() => {
+          authSection.classList.add('hide');
+          postSection.classList.remove('hide');
+          filterSection.classList.remove('hide');
+          logoutBtn.classList.remove('hide');
+        })
+        .catch(e => alert(e.message));
+    };
+
+    logoutBtn.onclick = () => {
+      auth.signOut();
+      authSection.classList.remove('hide');
+      postSection.classList.add('hide');
+      filterSection.classList.add('hide');
+      logoutBtn.classList.add('hide');
+    };
+
+    submitBtn.onclick = () => {
+      const loc = document.getElementById('location').value;
+      const field = document.getElementById('field').value;
+      const type = document.getElementById('type').value;
+      const title = document.getElementById('title').value;
+      const desc = document.getElementById('desc').value;
+      const telegram = document.getElementById("telegram").value.trim();
+
+      if (!title || !desc || !loc || !field || !type) return alert('Fill all fields');
+
+      const newPostRef = db.ref('posts').push();
+      newPostRef.set({
+        title,
+        desc,
+        location: loc,
+        field,
+        type,
+        telegram,
+        uid: auth.currentUser.uid
+      }).then(() => {
+        showToast();
+      }).catch(err => {
+        alert("Failed to post: " + err.message);
+      });
+    };
+
+    filterBtn.onclick = () => {
+      const fLoc = document.getElementById('filter-location').value;
+      const fField = document.getElementById('filter-field').value;
+
+      db.ref('posts').once('value', snapshot => {
+        listings.innerHTML = '';
+        snapshot.forEach(child => {
+          const post = child.val();
+          if ((fLoc === '' || post.location === fLoc) && (fField === '' || post.field === fField)) {
+            listings.innerHTML += `
+              <div class="card">
+                <div class="card-body">
+                  <h5>${post.title}</h5>
+                  <p>${post.desc}</p>
+                  <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
+                  <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
+                </div>
+              </div>`;
+          }
+        });
+      });
+    };
+  </script>
+</body>
+</html>
+
+
 
 
 
