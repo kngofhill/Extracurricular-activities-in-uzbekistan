@@ -173,7 +173,7 @@
   
 
 <script>
-
+window.onload = function() {
 function showAuth(type) {
   const loginForm = document.getElementById("loginForm");
   const registerForm = document.getElementById("registerForm");
@@ -261,7 +261,7 @@ auth.onAuthStateChanged(user => {
   filterBtn.onclick();
 });
 
-
+postECBtn.onclick = showCreateForm;
 
 
 
@@ -359,7 +359,7 @@ document.getElementById("loginForm").onsubmit = (e) => {
     .catch(e => alert(e.message));
 };
 
-
+}
 
 
 </script>
