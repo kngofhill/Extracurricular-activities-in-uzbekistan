@@ -107,8 +107,9 @@
     <!-- Listings -->
     <div id="listings" class="mt-4">
 
-<button id="postECBtn" class="btn btn-success my-3" onclick="showCreateForm()">I want to post an EC opportunity</button>
-
+<div class="mt-3">
+  <button id="postECBtn" class="btn btn-success my-3" onclick="showCreateForm()">I want to post an EC opportunity</button>
+</div>
     </div>
   </div>
     <!-- Post Form -->
@@ -239,7 +240,6 @@ function showCreateForm() {
   const logoutBtn = document.getElementById('logoutBtn');
   const submitBtn = document.getElementById('submitBtn');
   const filterBtn = document.getElementById('filterBtn');
-  const postSection = document.getElementById('post-section');
   const filterSection = document.getElementById('filter-section');
   const listings = document.getElementById('listings');
 
@@ -293,6 +293,15 @@ filterBtn.onclick(); // triggers full fetch
     }).then(() => {
       showToast();
       document.getElementById("createListingSection").style.display = "none"; 
+      document.getElementById('title').value = '';
+      document.getElementById('desc').value = '';
+      document.getElementById('telegram').value = '';
+      document.getElementById('location').selectedIndex = 0;
+      document.getElementById('field').selectedIndex = 0;
+      document.getElementById('type').selectedIndex = 0;
+
+      listings.scrollIntoView({ behavior: 'smooth' });
+      filterBtn.onclick();
     }).catch(err => {
       alert("Failed to post: " + err.message);
     });
