@@ -29,23 +29,26 @@
       <button id="logoutBtn" class="btn btn-danger mt-2 hide">Logout</button>
     </div>
   <!-- Filter Section -->
-    <div id="filter-section" class="mt-4 hide">
-      <h3>Filter Listings</h3>
-      <select id="filter-location" class="form-control">
-        <option value="">All Locations</option>
-        <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
-        <option>Samarkand</option><option>Bukhara</option><option>Namangan</option>
-        <option>Khorezm</option><option>Karakalpakstan</option><option>Jizzakh</option>
-        <option>Kashkadarya</option><option>Surkhandarya</option><option>Syrdarya</option>
-        <option>Navoi</option><option>Gulistan</option>
-      </select>
-      <select id="filter-field" class="form-control mt-2">
-        <option value="">All Fields</option>
-        <option>STEM</option><option>Business</option><option>Art</option>
-        <option>Leadership</option><option>Debate</option><option>Writing</option>
-      </select>
-      <button id="filterBtn" class="btn btn-info mt-2">Filter</button>
-    </div>
+<div id="filter-section" class="mt-4">
+  <h3>Filter Listings</h3>
+  <div class="d-flex flex-column flex-md-row gap-2">
+    <select id="filter-location" class="form-control">
+      <option value="">All Locations</option>
+      <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
+      <option>Samarkand</option><option>Bukhara</option><option>Namangan</option>
+      <option>Khorezm</option><option>Karakalpakstan</option><option>Jizzakh</option>
+      <option>Kashkadarya</option><option>Surkhandarya</option><option>Syrdarya</option>
+      <option>Navoi</option><option>Gulistan</option>
+    </select>
+    <select id="filter-field" class="form-control">
+      <option value="">All Fields</option>
+      <option>STEM</option><option>Business</option><option>Art</option>
+      <option>Leadership</option><option>Debate</option><option>Writing</option>
+    </select>
+    <button id="filterBtn" class="btn btn-info">Filter</button>
+  </div>
+</div>
+
 
     <!-- Listings -->
     <div id="listings" class="mt-4"></div>
@@ -98,10 +101,16 @@
 
 <script>
 function showCreateForm() {
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Please register or log in to post an opportunity.");
+    return;
+  }
   const section = document.getElementById("createListingSection");
   section.style.display = "block";
   section.scrollIntoView({ behavior: "smooth" });
 }
+
 
   const firebaseConfig = {
     apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
@@ -155,19 +164,20 @@ function showCreateForm() {
   };
 
   // AUTH STATE LISTENER
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      authSection.classList.add('hide');
-      postSection.classList.remove('hide');
-      filterSection.classList.remove('hide');
-      logoutBtn.classList.remove('hide');
-    } else {
-      authSection.classList.remove('hide');
-      postSection.classList.add('hide');
-      filterSection.classList.add('hide');
-      logoutBtn.classList.add('hide');
-    }
-  });
+auth.onAuthStateChanged(user => {
+  if (user) {
+    authSection.classList.add('hide');
+    postSection.classList.remove('hide');
+    logoutBtn.classList.remove('hide');
+  } else {
+    authSection.classList.remove('hide');
+    postSection.classList.add('hide');
+    logoutBtn.classList.add('hide');
+  }
+  // Always show filters regardless of auth state
+  filterSection.classList.remove('hide');
+});
+
 
   // SUBMIT POST
   submitBtn.onclick = () => {
