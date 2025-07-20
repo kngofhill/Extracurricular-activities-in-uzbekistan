@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EC Platform Uzbekistan</title>
+<!--Auth buttons-->
+  <div class="d-flex justify-content-end gap-2 mb-3">
+  <button class="btn btn-outline-primary" onclick="showAuth('login')">Log In</button>
+  <button class="btn btn-outline-secondary" onclick="showAuth('register')">Register</button>
+</div>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -20,6 +26,8 @@
     <h1 class="text-center">EC Platform Uzbekistan</h1>
 
     <!-- Auth Section -->
+    <!-- 🔒 AUTH SECTION - HIDDEN BY DEFAULT -->
+<section id="authSection" style="display: none;">
     <div id="auth-section">
       <h3>Register / Login</h3>
       <input id="email" class="form-control" placeholder="Email" type="email">
@@ -28,6 +36,7 @@
       <button id="loginBtn" class="btn btn-success mt-2">Login</button>
       <button id="logoutBtn" class="btn btn-danger mt-2 hide">Logout</button>
     </div>
+</section>
   <!-- Filter Section -->
 <div id="filter-section" class="mt-4">
   <h3>Filter Listings</h3>
@@ -96,9 +105,25 @@
       </div>
     </div>
 
+
+
   
 
 <script>
+function showAuth(mode) {
+  const authSection = document.getElementById("authSection");
+  authSection.style.display = "block";
+  authSection.scrollIntoView({ behavior: "smooth" });
+
+  if (mode === "login") {
+    const loginEmail = document.getElementById("loginEmail");
+    if (loginEmail) loginEmail.focus();
+  } else if (mode === "register") {
+    const registerEmail = document.getElementById("registerEmail");
+    if (registerEmail) registerEmail.focus();
+  }
+}
+
 function showCreateForm() {
   const user = auth.currentUser;
   if (!user) {
@@ -165,17 +190,20 @@ function showCreateForm() {
   // AUTH STATE LISTENER
 auth.onAuthStateChanged(user => {
   if (user) {
-    authSection.classList.add('hide');
+    // Hide auth section and show post option
+    authSection.style.display = "none";
     postSection.classList.remove('hide');
     logoutBtn.classList.remove('hide');
   } else {
-    authSection.classList.remove('hide');
+    // Don't show auth section unless explicitly triggered
+    authSection.style.display = "none";
     postSection.classList.add('hide');
     logoutBtn.classList.add('hide');
   }
-  // Always show filters regardless of auth state
+  // Filters and listings should always be visible
   filterSection.classList.remove('hide');
 });
+
 
 
   // SUBMIT POST
@@ -204,6 +232,10 @@ auth.onAuthStateChanged(user => {
       alert("Failed to post: " + err.message);
     });
   };
+#authSection {
+  max-width: 400px;
+  margin: auto;
+}
 
   // FILTER POSTS
   filterBtn.onclick = () => {
