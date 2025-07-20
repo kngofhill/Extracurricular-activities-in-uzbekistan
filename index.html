@@ -52,6 +52,7 @@
   </div>
     <!-- Post Form -->
     <div id="post-section" class="hide">
+      <button class="btn btn-success my-3" onclick="showCreateForm()">I want to post an EC opportunity</button>
       <h3 class="mt-4">Create an EC Listing</h3>
       <select id="location" class="form-control">
         <option disabled selected>Choose location</option>
@@ -90,6 +91,9 @@
   
 
 <script>
+  function showCreateForm() {
+    document.getElementById("createListingSection").style.display = "block";
+  }
   const firebaseConfig = {
     apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
     authDomain: "extracurricularsuzbekistan.firebaseapp.com",
