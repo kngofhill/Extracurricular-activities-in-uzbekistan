@@ -154,6 +154,23 @@
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
     </div>
+  <!-- Auth Prompt Modal -->
+<div class="modal fade" id="loginPromptModal" tabindex="-1" aria-labelledby="loginPromptLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loginPromptLabel">Authentication Required</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>Please log in or register to post an opportunity.</p>
+        <button class="btn btn-primary me-2" onclick="openAuthFromPrompt('login')">Log In</button>
+        <button class="btn btn-secondary" onclick="openAuthFromPrompt('register')">Register</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
 
@@ -178,18 +195,25 @@ function showAuth(type) {
   const modal = new bootstrap.Modal(document.getElementById("authModal"));
   modal.show();
 }
+function openAuthFromPrompt(type) {
+  const promptModal = bootstrap.Modal.getInstance(document.getElementById("loginPromptModal"));
+  promptModal.hide();
+  showAuth(type);
+}
 
 
 function showCreateForm() {
   const user = auth.currentUser;
   if (!user) {
-    alert("Please register or log in to post an opportunity.");
+    const modal = new bootstrap.Modal(document.getElementById("loginPromptModal"));
+    modal.show();
     return;
   }
   const section = document.getElementById("createListingSection");
   section.style.display = "block";
   section.scrollIntoView({ behavior: "smooth" });
 }
+
 
 
   const firebaseConfig = {
