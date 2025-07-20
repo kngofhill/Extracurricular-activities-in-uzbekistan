@@ -28,7 +28,28 @@
       <button id="loginBtn" class="btn btn-success mt-2">Login</button>
       <button id="logoutBtn" class="btn btn-danger mt-2 hide">Logout</button>
     </div>
+  <!-- Filter Section -->
+    <div id="filter-section" class="mt-4 hide">
+      <h3>Filter Listings</h3>
+      <select id="filter-location" class="form-control">
+        <option value="">All Locations</option>
+        <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
+        <option>Samarkand</option><option>Bukhara</option><option>Namangan</option>
+        <option>Khorezm</option><option>Karakalpakstan</option><option>Jizzakh</option>
+        <option>Kashkadarya</option><option>Surkhandarya</option><option>Syrdarya</option>
+        <option>Navoi</option><option>Gulistan</option>
+      </select>
+      <select id="filter-field" class="form-control mt-2">
+        <option value="">All Fields</option>
+        <option>STEM</option><option>Business</option><option>Art</option>
+        <option>Leadership</option><option>Debate</option><option>Writing</option>
+      </select>
+      <button id="filterBtn" class="btn btn-info mt-2">Filter</button>
+    </div>
 
+    <!-- Listings -->
+    <div id="listings" class="mt-4"></div>
+  </div>
     <!-- Post Form -->
     <div id="post-section" class="hide">
       <h3 class="mt-4">Create an EC Listing</h3>
@@ -66,28 +87,7 @@
       </div>
     </div>
 
-    <!-- Filter Section -->
-    <div id="filter-section" class="mt-4 hide">
-      <h3>Filter Listings</h3>
-      <select id="filter-location" class="form-control">
-        <option value="">All Locations</option>
-        <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
-        <option>Samarkand</option><option>Bukhara</option><option>Namangan</option>
-        <option>Khorezm</option><option>Karakalpakstan</option><option>Jizzakh</option>
-        <option>Kashkadarya</option><option>Surkhandarya</option><option>Syrdarya</option>
-        <option>Navoi</option><option>Gulistan</option>
-      </select>
-      <select id="filter-field" class="form-control mt-2">
-        <option value="">All Fields</option>
-        <option>STEM</option><option>Business</option><option>Art</option>
-        <option>Leadership</option><option>Debate</option><option>Writing</option>
-      </select>
-      <button id="filterBtn" class="btn btn-info mt-2">Filter</button>
-    </div>
-
-    <!-- Listings -->
-    <div id="listings" class="mt-4"></div>
-  </div>
+  
 
   <script>
     const firebaseConfig = {
@@ -180,21 +180,26 @@
 
       db.ref('posts').once('value', snapshot => {
         listings.innerHTML = '';
-        snapshot.forEach(child => {
-          const post = child.val();
-          if ((fLoc === '' || post.location === fLoc) && (fField === '' || post.field === fField)) {
-            listings.innerHTML += `
-              <div class="card">
-                <div class="card-body">
-                  <h5>${post.title}</h5>
-                  <p>${post.desc}</p>
-                  <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
-                  <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
-                </div>
-              </div>`;
-          }
-        });
-      });
+  let found = false;
+  snapshot.forEach(child => {
+    const post = child.val();
+    if ((fLoc === '' || post.location === fLoc) && (fField === '' || post.field === fField)) {
+      found = true;
+      listings.innerHTML += `
+        <div class="card">
+          <div class="card-body">
+            <h5>${post.title}</h5>
+            <p>${post.desc}</p>
+            <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
+            <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
+          </div>
+        </div>`;
+    }
+  });
+  if (!found) {
+    listings.innerHTML = `<p class="text-muted mt-3">No opportunities match your filters. Please try again later.</p>`;
+  }
+
     };
   </script>
 </body>
