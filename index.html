@@ -15,6 +15,10 @@
     body { padding: 2rem; background-color: #f0f8ff; }
     .card { margin-top: 1rem; }
     .hide { display: none; }
+    .card {
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
     #listings .card {
   margin-bottom: 1rem;
 }
@@ -36,8 +40,6 @@
 
 
 </div>
-
-
     <h1 class="text-center">EC Platform Uzbekistan</h1>
 <div class="d-flex justify-content-center justify-content-md-end mt-3 mb-3">
   <button id="postECBtn" class="btn btn-success px-4 py-2 rounded-pill shadow">I want to post</button>
@@ -113,6 +115,16 @@
     <!-- Listings -->
 
 <div id="listings" class="mt-3"></div>
+  <div class="modal fade" id="enrollModal" tabindex="-1" aria-labelledby="enrollModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content p-3">
+      <h5 class="modal-title" id="enrollModalLabel">Enter your Telegram details</h5>
+      <input id="telegramUsername" class="form-control my-2" placeholder="Your Telegram username">
+      <input id="telegramNumber" class="form-control my-2" placeholder="Your Telegram number">
+      <button id="submitEnroll" class="btn btn-primary mt-2">Submit</button>
+    </div>
+  </div>
+</div>
 <!-- 🔽 The form to create a listing (hidden by default) -->
 <div id="createListingSection" class="mt-3" style="display: none;">
   <!-- Your form elements -->
@@ -142,7 +154,25 @@
     <button id="submitBtn" class="btn btn-warning mt-2">Post</button>
   </div>
 </div>
-
+<!-- modal for enrolling-->
+<div class="modal fade" id="enrollModal" tabindex="-1" aria-labelledby="enrollModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="enrollModalLabel">Enroll in Opportunity</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="telegramUsername" class="form-control mb-2" placeholder="Your Telegram username">
+        <input type="text" id="telegramNumber" class="form-control" placeholder="Your Telegram number">
+        <input type="hidden" id="enrollListingId">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="submitEnroll">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
 
     <!-- Toast Notification -->
     <div id="postToast" class="toast position-fixed bottom-0 end-0 end-md-0 start-md-auto m-3 align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -170,7 +200,39 @@
   </div>
 </div>
 
-
+<!-- Enroll Modal -->
+<div class="modal fade" id="enrollModal" tabindex="-1" aria-labelledby="enrollModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="enrollForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="enrollModalLabel">Enroll in Opportunity</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="telegramUsername" class="form-control mb-2" placeholder="Telegram username (e.g., @username)" required />
+          <input type="text" id="telegramNumber" class="form-control" placeholder="Telegram number (e.g., +998...)" required />
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="interestedUsersModal" tabindex="-1" aria-labelledby="interestedUsersModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="interestedUsersModalLabel">Interested Users</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <ul id="interestedUsersList" class="list-group"></ul>
+      </div>
+    </div>
+  </div>
+</div>
 
 
   
@@ -323,7 +385,7 @@ postECBtn.onclick = showCreateForm;
       document.getElementById('type').selectedIndex = 0;
 
       listings.scrollIntoView({ behavior: 'smooth' });
-      filterBtn.onclick();
+
     }).catch(err => {
       alert("Failed to post: " + err.message);
     });
@@ -331,6 +393,26 @@ postECBtn.onclick = showCreateForm;
 
   // FILTER POSTS
   filterBtn.onclick = () => {
+    if ((fLoc === '' || post.location === fLoc) && (fField === '' || post.field === fField)) {
+  found = true;
+
+  let html = `
+    <div class="card">
+      <div class="card-body">
+        <h5>${post.title}</h5>
+        <p>${post.desc}</p>
+        <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
+        <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
+        <button class="btn btn-outline-primary enroll-btn" data-id="${child.key}">Enroll</button>
+  `;
+
+  if (auth.currentUser && post.uid === auth.currentUser.uid) {
+    html += `<button class="btn btn-info mt-2 show-interested-btn" data-id="${child.key}">Show Interested Users</button>`;
+  }
+
+  html += `</div></div>`;
+  listings.innerHTML += html;
+}
     const fLoc = document.getElementById('filter-location').value;
     const fField = document.getElementById('filter-field').value;
 
@@ -368,7 +450,7 @@ document.getElementById("registerForm").onsubmit = (e) => {
     })
     .catch(e => alert(e.message));
 };
-filterBtn.onclick(); // Reload unfiltered listings
+ // Reload unfiltered listings
 
 // LOGIN
 document.getElementById("loginForm").onsubmit = (e) => {
@@ -390,12 +472,181 @@ document.getElementById("loginForm").onsubmit = (e) => {
   auth.signOut().then(() => {
     alert('Logged out');
     listings.innerHTML = ''; // Clear listings on logout
-    filterBtn.onclick();     // Optionally refresh with empty listings
+      // Optionally refresh with empty listings
   });
 };
+ let currentListingId = null;
+
+  // Show modal on enroll button click
+  document.addEventListener("click", function(e) {
+    if (e.target.classList.contains("enroll-btn")) {
+      currentListingId = e.target.dataset.id;
+      const modal = new bootstrap.Modal(document.getElementById('enrollModal'));
+      modal.show();
+    }
+  });
+
+  // Submit enrollment
+  document.getElementById("submitEnroll").addEventListener("click", async () => {
+    const username = document.getElementById("telegramUsername").value.trim();
+    const number = document.getElementById("telegramNumber").value.trim();
+
+    if (!username || !number) {
+      alert("Please fill in both fields.");
+      return;
+    }
+
+    // Save to subcollection 'enrollments' under listing doc
+db.ref(`enrollments/${currentListingId}`).push({
+  username,
+  number,
+  enrolledAt: Date.now(),
+});
+
+
+    alert("You’ve been enrolled!");
+    bootstrap.Modal.getInstance(document.getElementById("enrollModal")).hide();
+
+    // Clear inputs
+    document.getElementById("telegramUsername").value = '';
+    document.getElementById("telegramNumber").value = '';
+  });
+  document.addEventListener("click", function(e) {
+  if (e.target.classList.contains("show-interested-btn")) {
+    const listingId = e.target.dataset.id;
+    db.ref(`enrollments/${listingId}`).once('value', snap => {
+      if (!snap.exists()) return alert("No one has enrolled yet.");
+
+      let info = "Interested Users:\n\n";
+      snap.forEach(child => {
+        const data = child.val();
+        info += `👤 ${data.username} | 📞 ${data.number}\n`;
+      });
+
+      alert(info);
+    });
+  }
+});
 
 
 }
+  document.addEventListener("click", function(e) {
+  if (e.target.classList.contains("enroll-btn")) {
+    const listingId = e.target.dataset.id;
+    document.getElementById("enrollListingId").value = listingId;
+    new bootstrap.Modal(document.getElementById("enrollModal")).show();
+  }
+});
+
+document.getElementById("submitEnroll").addEventListener("click", () => {
+  const username = document.getElementById("telegramUsername").value.trim();
+  const number = document.getElementById("telegramNumber").value.trim();
+  const listingId = document.getElementById("enrollListingId").value;
+
+  if (!username || !number) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Please log in to enroll.");
+    return;
+  }
+
+  const enrollRef = db.collection("listings").doc(listingId).collection("interestedUsers");
+
+  enrollRef.doc(user.uid).set({
+    telegramUsername: username,
+    telegramNumber: number,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => {
+    alert("Enrolled successfully!");
+    bootstrap.Modal.getInstance(document.getElementById("enrollModal")).hide();
+  }).catch(error => {
+    console.error("Enrollment error:", error);
+    alert("Failed to enroll. Please try again.");
+  });
+});
+
+  if (!title || !desc || !loc || !field || !type) {
+  alert('Fill all fields'); // Replace with inline error later
+  return;
+}
+  let selectedListingId = null;
+
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("enroll-btn")) {
+    selectedListingId = e.target.dataset.id;
+    new bootstrap.Modal(document.getElementById("enrollModal")).show();
+  }
+});
+
+document.getElementById("enrollForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const username = document.getElementById("telegramUsername").value.trim();
+  const number = document.getElementById("telegramNumber").value.trim();
+  const user = auth.currentUser;
+
+  if (!user) {
+    alert("You must be logged in to enroll.");
+    return;
+  }
+
+  try {
+    await db.collection("listings")
+      .doc(selectedListingId)
+      .collection("interestedUsers")
+      .doc(user.uid)
+      .set({
+        username,
+        number,
+        userId: user.uid,
+        email: user.email,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+    bootstrap.Modal.getInstance(document.getElementById("enrollModal")).hide();
+    alert("Enrollment submitted!");
+  } catch (err) {
+    console.error("Enrollment error:", err);
+    alert("Failed to enroll. Please try again.");
+  }
+});
+document.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("show-users-btn")) {
+    const listingId = e.target.dataset.id;
+    const usersList = document.getElementById("interestedUsersList");
+    usersList.innerHTML = "<li class='list-group-item'>Loading...</li>";
+
+    const usersSnapshot = await db.collection("listings")
+      .doc(listingId)
+      .collection("interestedUsers")
+      .orderBy("timestamp", "desc")
+      .get();
+
+    usersList.innerHTML = "";
+
+    if (usersSnapshot.empty) {
+      usersList.innerHTML = "<li class='list-group-item'>No one has enrolled yet.</li>";
+    } else {
+      usersSnapshot.forEach(doc => {
+        const user = doc.data();
+        usersList.innerHTML += `
+          <li class="list-group-item">
+            <strong>@${user.username}</strong><br>
+            📞 ${user.number}<br>
+            📧 ${user.email}
+          </li>
+        `;
+      });
+    }
+
+    new bootstrap.Modal(document.getElementById("interestedUsersModal")).show();
+  }
+});
+
+  filterBtn.onclick();
 
 
 </script>
