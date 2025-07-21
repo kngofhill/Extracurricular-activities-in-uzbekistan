@@ -32,15 +32,17 @@
 <div class="d-flex justify-content-center gap-2 my-4">
   <button class="btn btn-outline-primary" onclick="showAuth('login')">Log In</button>
   <button class="btn btn-outline-secondary" onclick="showAuth('register')">Register</button>
-  <button id="logoutBtn" class="btn btn-danger hide" onclick="auth.signOut()">Log Out</button>
+  <button id="logoutBtn" class="btn btn-danger hide">Log Out</button>
+
 
 </div>
 
 
     <h1 class="text-center">EC Platform Uzbekistan</h1>
-<div class="text-center mt-3 mb-4">
-  <button id="postECBtn" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm">I want to post</button>
+<div class="d-flex justify-content-center justify-content-md-end mt-3 mb-3">
+  <button id="postECBtn" class="btn btn-success px-4 py-2 rounded-pill shadow">I want to post</button>
 </div>
+
 
 
 <!-- Auth Modal -->
@@ -366,6 +368,7 @@ document.getElementById("registerForm").onsubmit = (e) => {
     })
     .catch(e => alert(e.message));
 };
+filterBtn.onclick(); // Reload unfiltered listings
 
 // LOGIN
 document.getElementById("loginForm").onsubmit = (e) => {
@@ -382,6 +385,15 @@ document.getElementById("loginForm").onsubmit = (e) => {
     })
     .catch(e => alert(e.message));
 };
+  filterBtn.onclick(); // Reload unfiltered listings
+  logoutBtn.onclick = () => {
+  auth.signOut().then(() => {
+    alert('Logged out');
+    listings.innerHTML = ''; // Clear listings on logout
+    filterBtn.onclick();     // Optionally refresh with empty listings
+  });
+};
+
 
 }
 
