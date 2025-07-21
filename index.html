@@ -173,6 +173,29 @@
   
 
 <script>
+  function showAuth(type) {
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
+
+    if (type === "login") {
+      loginForm.style.display = "block";
+      registerForm.style.display = "none";
+      document.getElementById("authModalLabel").innerText = "Log In";
+    } else {
+      loginForm.style.display = "none";
+      registerForm.style.display = "block";
+      document.getElementById("authModalLabel").innerText = "Register";
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById("authModal"));
+    modal.show();
+  }
+
+  function openAuthFromPrompt(type) {
+    const promptModal = bootstrap.Modal.getInstance(document.getElementById("loginPromptModal"));
+    promptModal.hide();
+    showAuth(type);
+  }
 window.onload = function() {
 function showAuth(type) {
   const loginForm = document.getElementById("loginForm");
