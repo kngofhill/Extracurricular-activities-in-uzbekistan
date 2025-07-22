@@ -280,11 +280,12 @@ auth.onAuthStateChanged(user => {
     logoutBtn.classList.remove('hide');
   } else {
     logoutBtn.classList.add('hide');
+    document.getElementById("createListingSection").style.display = "none"; // 🔴 Hide form on logout
   }
 
-  // ✅ NOW we can safely load listings
   filterBtn.onclick();
 });
+
 
 postECBtn.onclick = showCreateForm;
 
@@ -388,12 +389,14 @@ document.getElementById("loginForm").onsubmit = (e) => {
 };
   filterBtn.onclick(); // Reload unfiltered listings
   logoutBtn.onclick = () => {
-  auth.signOut().then(() => {
-    alert('Logged out');
-    listings.innerHTML = ''; // Clear listings on logout
-    filterBtn.onclick();     // Optionally refresh with empty listings
-  });
-};
+    auth.signOut().then(() => {
+      alert('Logged out');
+      listings.innerHTML = '';
+      document.getElementById("createListingSection").style.display = "none"; // 🔴 HIDE POST FORM
+      filterBtn.onclick();
+    });
+  };
+
 
 
 }
