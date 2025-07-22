@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EC Platform Uzbekistan</title>
-<!--Auth buttons-->
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -16,132 +14,119 @@
     .card { margin-top: 1rem; }
     .hide { display: none; }
     #listings .card {
-  margin-bottom: 1rem;
-}
-.modal-content {
-  border-radius: 1rem;
-  border: none;
-}
-
+      margin-bottom: 1rem;
+    }
+    .modal-content {
+      border-radius: 1rem;
+      border: none;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <!--Auth buttons-->
-<!--Auth buttons-->
-<div class="d-flex justify-content-center gap-2 my-4">
-  <button class="btn btn-outline-primary" onclick="showAuth('login')">Log In</button>
-  <button class="btn btn-outline-secondary" onclick="showAuth('register')">Register</button>
-  <button id="logoutBtn" class="btn btn-danger hide">Log Out</button>
-
-
-</div>
-
+    <div class="d-flex justify-content-center gap-2 my-4">
+      <button class="btn btn-outline-primary" onclick="showAuth('login')">Log In</button>
+      <button class="btn btn-outline-secondary" onclick="showAuth('register')">Register</button>
+      <button id="logoutBtn" class="btn btn-danger hide">Log Out</button>
+    </div>
 
     <h1 class="text-center">EC Platform Uzbekistan</h1>
-<div class="d-flex justify-content-center justify-content-md-end mt-3 mb-3">
-  <button id="postECBtn" class="btn btn-success px-4 py-2 rounded-pill shadow">I want to post</button>
-</div>
+    <div class="d-flex justify-content-center justify-content-md-end mt-3 mb-3">
+      <button id="postECBtn" class="btn btn-success px-4 py-2 rounded-pill shadow">I want to post</button>
+    </div>
 
+    <!-- Auth Modal -->
+    <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg rounded-4">
+          <div class="modal-header">
+            <h5 class="modal-title" id="authModalLabel">Log In or Register</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Login Form -->
+            <form id="loginForm" style="display: none;">
+              <div class="mb-3">
+                <input type="email" class="form-control" id="loginEmail" placeholder="Email" required />
+              </div>
+              <div class="mb-3">
+                <input type="password" class="form-control" id="loginPassword" placeholder="Password" required />
+              </div>
+              <button type="submit" class="btn btn-primary w-100">Log In</button>
+              <p class="text-center mt-2">
+                Don't have an account?
+                <a href="#" onclick="showAuth('register')">Register</a>
+              </p>
+            </form>
 
-<!-- Auth Modal -->
-<div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content shadow-lg rounded-4">
-      <div class="modal-header">
-        <h5 class="modal-title" id="authModalLabel">Log In or Register</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Login Form -->
-        <form id="loginForm" style="display: none;">
-          <div class="mb-3">
-            <input type="email" class="form-control" id="loginEmail" placeholder="Email" required />
+            <!-- Register Form -->
+            <form id="registerForm" style="display: none;">
+              <div class="mb-3">
+                <input type="email" class="form-control" id="registerEmail" placeholder="Email" required />
+              </div>
+              <div class="mb-3">
+                <input type="password" class="form-control" id="registerPassword" placeholder="Password" required />
+              </div>
+              <button type="submit" class="btn btn-secondary w-100">Register</button>
+              <p class="text-center mt-2">
+                Already have an account?
+                <a href="#" onclick="showAuth('login')">Log In</a>
+              </p>
+            </form>
           </div>
-          <div class="mb-3">
-            <input type="password" class="form-control" id="loginPassword" placeholder="Password" required />
-          </div>
-          <button type="submit" class="btn btn-primary w-100">Log In</button>
-          <p class="text-center mt-2">
-            Don't have an account?
-            <a href="#" onclick="showAuth('register')">Register</a>
-          </p>
-        </form>
-
-        <!-- Register Form -->
-        <form id="registerForm" style="display: none;">
-          <div class="mb-3">
-            <input type="email" class="form-control" id="registerEmail" placeholder="Email" required />
-          </div>
-          <div class="mb-3">
-            <input type="password" class="form-control" id="registerPassword" placeholder="Password" required />
-          </div>
-          <button type="submit" class="btn btn-secondary w-100">Register</button>
-          <p class="text-center mt-2">
-            Already have an account?
-            <a href="#" onclick="showAuth('login')">Log In</a>
-          </p>
-        </form>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-  <!-- Filter Section -->
-<div id="filter-section" class="mt-4">
-  <h3>Filter Listings</h3>
-  <div class="d-flex flex-column flex-md-row gap-2">
-    <select id="filter-location" class="form-control">
-      <option value="">All Locations</option>
-      <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
-      <option>Samarkand</option><option>Bukhara</option><option>Namangan</option>
-      <option>Khorezm</option><option>Karakalpakstan</option><option>Jizzakh</option>
-      <option>Kashkadarya</option><option>Surkhandarya</option><option>Syrdarya</option>
-      <option>Navoi</option><option>Gulistan</option>
-    </select>
-    <select id="filter-field" class="form-control">
-      <option value="">All Fields</option>
-      <option>STEM</option><option>Business</option><option>Art</option>
-      <option>Leadership</option><option>Debate</option><option>Writing</option>
-    </select>
-    <button id="filterBtn" class="btn btn-info">Filter</button>
-  </div>
-</div>
-
+    <!-- Filter Section -->
+    <div id="filter-section" class="mt-4">
+      <h3>Filter Listings</h3>
+      <div class="d-flex flex-column flex-md-row gap-2">
+        <select id="filter-location" class="form-control">
+          <option value="">All Locations</option>
+          <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
+          <option>Samarkand</option><option>Bukhara</option><option>Namangan</option>
+          <option>Khorezm</option><option>Karakalpakstan</option><option>Jizzakh</option>
+          <option>Kashkadarya</option><option>Surkhandarya</option><option>Syrdarya</option>
+          <option>Navoi</option><option>Gulistan</option>
+        </select>
+        <select id="filter-field" class="form-control">
+          <option value="">All Fields</option>
+          <option>STEM</option><option>Business</option><option>Art</option>
+          <option>Leadership</option><option>Debate</option><option>Writing</option>
+        </select>
+        <button id="filterBtn" class="btn btn-info">Filter</button>
+      </div>
+    </div>
 
     <!-- Listings -->
+    <div id="listings" class="mt-3"></div>
 
-<div id="listings" class="mt-3"></div>
-<!-- 🔽 The form to create a listing (hidden by default) -->
-<div id="createListingSection" class="mt-3" style="display: none;">
-  <!-- Your form elements -->
-
-
-    <select id="location" class="form-control">
-      <option disabled selected>Choose location</option>
-      <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
-      <option>Samarkand</option><option>Bukhara</option><option>Namangan</option>
-      <option>Khorezm</option><option>Karakalpakstan</option><option>Jizzakh</option>
-      <option>Kashkadarya</option><option>Surkhandarya</option><option>Syrdarya</option>
-      <option>Navoi</option><option>Gulistan</option>
-    </select>
-    <select id="field" class="form-control mt-2">
-      <option disabled selected>Choose field of EC</option>
-      <option>STEM</option><option>Business</option><option>Art</option>
-      <option>Leadership</option><option>Debate</option><option>Writing</option>
-    </select>
-    <select id="type" class="form-control mt-2">
-      <option disabled selected>Choose type of EC</option>
-      <option>Competition</option><option>Internship</option><option>Volunteering</option>
-      <option>Online Course</option><option>Workshop</option><option>Club</option>
-    </select>
-    <input id="telegram" class="form-control mt-2" placeholder="Telegram Username (e.g. @myusername)" />
-    <input id="title" class="form-control mt-2" placeholder="Title" />
-    <textarea id="desc" class="form-control mt-2" placeholder="Description"></textarea>
-    <button id="submitBtn" class="btn btn-warning mt-2">Post</button>
-  </div>
-</div>
-
+    <!-- Create Listing Form -->
+    <div id="createListingSection" class="mt-3" style="display: none;">
+      <select id="location" class="form-control">
+        <option disabled selected>Choose location</option>
+        <option>Andijan</option><option>Fergana</option><option>Tashkent</option>
+        <option>Samarkand</option><option>Bukhara</option><option>Namangan</option>
+        <option>Khorezm</option><option>Karakalpakstan</option><option>Jizzakh</option>
+        <option>Kashkadarya</option><option>Surkhandarya</option><option>Syrdarya</option>
+        <option>Navoi</option><option>Gulistan</option>
+      </select>
+      <select id="field" class="form-control mt-2">
+        <option disabled selected>Choose field of EC</option>
+        <option>STEM</option><option>Business</option><option>Art</option>
+        <option>Leadership</option><option>Debate</option><option>Writing</option>
+      </select>
+      <select id="type" class="form-control mt-2">
+        <option disabled selected>Choose type of EC</option>
+        <option>Competition</option><option>Internship</option><option>Volunteering</option>
+        <option>Online Course</option><option>Workshop</option><option>Club</option>
+      </select>
+      <input id="telegram" class="form-control mt-2" placeholder="Telegram Username (e.g. @myusername)" />
+      <input id="title" class="form-control mt-2" placeholder="Title" />
+      <textarea id="desc" class="form-control mt-2" placeholder="Description"></textarea>
+      <button id="submitBtn" class="btn btn-warning mt-2">Post</button>
+    </div>
 
     <!-- Toast Notification -->
     <div id="postToast" class="toast position-fixed bottom-0 end-0 end-md-0 start-md-auto m-3 align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -152,234 +137,229 @@
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
     </div>
-  <!-- Auth Prompt Modal -->
-<div class="modal fade" id="loginPromptModal" tabindex="-1" aria-labelledby="loginPromptLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 shadow">
-      <div class="modal-header">
-        <h5 class="modal-title" id="loginPromptLabel">Authentication Required</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center">
-        <p>Please log in or register to post an opportunity.</p>
-        <button class="btn btn-primary me-2" onclick="openAuthFromPrompt('login')">Log In</button>
-        <button class="btn btn-secondary" onclick="openAuthFromPrompt('register')">Register</button>
+
+    <!-- Auth Prompt Modal -->
+    <div class="modal fade" id="loginPromptModal" tabindex="-1" aria-labelledby="loginPromptLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow">
+          <div class="modal-header">
+            <h5 class="modal-title" id="loginPromptLabel">Authentication Required</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+            <p>Please log in or register to post an opportunity.</p>
+            <button class="btn btn-primary me-2" onclick="openAuthFromPrompt('login')">Log In</button>
+            <button class="btn btn-secondary" onclick="openAuthFromPrompt('register')">Register</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Firebase Configuration and Initialization
+      const firebaseConfig = {
+        apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
+        authDomain: "extracurricularsuzbekistan.firebaseapp.com",
+        databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com",
+        projectId: "extracurricularsuzbekistan",
+        storageBucket: "extracurricularsuzbekistan.firebasestorage.app",
+        messagingSenderId: "555521664728",
+        appId: "1:555521664728:web:bf72cb8384be98ff7b99ad",
+        measurementId: "G-Z53076ZBCJ"
+      };
 
+      // Initialize Firebase
+      const app = firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.database();
 
+      // DOM Elements
+      const loginForm = document.getElementById("loginForm");
+      const registerForm = document.getElementById("registerForm");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const postECBtn = document.getElementById("postECBtn");
+      const submitBtn = document.getElementById("submitBtn");
+      const filterBtn = document.getElementById("filterBtn");
+      const listings = document.getElementById("listings");
 
-  
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  // Firebase Configuration and Initialization
-  const firebaseConfig = {
-    apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
-    authDomain: "extracurricularsuzbekistan.firebaseapp.com",
-    databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com",
-    projectId: "extracurricularsuzbekistan",
-    storageBucket: "extracurricularsuzbekistan.firebasestorage.app",
-    messagingSenderId: "555521664728",
-    appId: "1:555521664728:web:bf72cb8384be98ff7b99ad",
-    measurementId: "G-Z53076ZBCJ"
-  };
-
-  // Initialize Firebase
-  const app = firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
-
-  // DOM Elements
-  const loginForm = document.getElementById("loginForm");
-  const registerForm = document.getElementById("registerForm");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const postECBtn = document.getElementById("postECBtn");
-  const submitBtn = document.getElementById("submitBtn");
-  const filterBtn = document.getElementById("filterBtn");
-  const listings = document.getElementById("listings");
-
-  // Show Auth Modal Function
-  function showAuth(type) {
-    if (type === "login") {
-      loginForm.style.display = "block";
-      registerForm.style.display = "none";
-      document.getElementById("authModalLabel").innerText = "Log In";
-    } else {
-      loginForm.style.display = "none";
-      registerForm.style.display = "block";
-      document.getElementById("authModalLabel").innerText = "Register";
-    }
-    new bootstrap.Modal(document.getElementById("authModal")).show();
-  }
-
-  // Open Auth From Prompt
-  function openAuthFromPrompt(type) {
-    bootstrap.Modal.getInstance(document.getElementById("loginPromptModal")).hide();
-    showAuth(type);
-  }
-
-  // Show Create Form Function
-  function showCreateForm() {
-    const user = auth.currentUser;
-    if (!user) {
-      new bootstrap.Modal(document.getElementById("loginPromptModal")).show();
-      return;
-    }
-    const section = document.getElementById("createListingSection");
-    section.style.display = "block";
-    section.scrollIntoView({ behavior: "smooth" });
-  }
-
-  // Show Toast Notification
-  function showToast() {
-    new bootstrap.Toast(document.getElementById("postToast")).show();
-  }
-
-  // Auth State Listener
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      logoutBtn.classList.remove("hide");
-      postECBtn.classList.remove("hide");
-    } else {
-      logoutBtn.classList.add("hide");
-      document.getElementById("createListingSection").style.display = "none";
-    }
-  });
-
-  // Login Form Submission
-  loginForm.addEventListener("submit", function(e) {
-    e.preventDefault();
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
-    
-    auth.signInWithEmailAndPassword(email, password)
-      .then(() => {
-        bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
-        document.getElementById("loginEmail").value = "";
-        document.getElementById("loginPassword").value = "";
-      })
-      .catch(error => {
-        let errorMessage = "Login failed. ";
-        if (error.code === "auth/wrong-password" || error.code === "auth/user-not-found") {
-          errorMessage += "Invalid email or password.";
+      // Show Auth Modal Function
+      window.showAuth = function(type) {
+        if (type === "login") {
+          loginForm.style.display = "block";
+          registerForm.style.display = "none";
+          document.getElementById("authModalLabel").innerText = "Log In";
         } else {
-          errorMessage += error.message;
+          loginForm.style.display = "none";
+          registerForm.style.display = "block";
+          document.getElementById("authModalLabel").innerText = "Register";
         }
-        alert(errorMessage);
-      });
-  });
+        new bootstrap.Modal(document.getElementById("authModal")).show();
+      };
 
-  // Register Form Submission
-  registerForm.addEventListener("submit", function(e) {
-    e.preventDefault();
-    const email = document.getElementById("registerEmail").value;
-    const password = document.getElementById("registerPassword").value;
-    
-    auth.createUserWithEmailAndPassword(email, password)
-      .then(() => {
-        alert("Registered successfully!");
-        bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
-      })
-      .catch(error => alert(error.message));
-  });
+      // Open Auth From Prompt
+      window.openAuthFromPrompt = function(type) {
+        bootstrap.Modal.getInstance(document.getElementById("loginPromptModal")).hide();
+        showAuth(type);
+      };
 
-  // Logout Function
-  logoutBtn.addEventListener("click", function() {
-    auth.signOut()
-      .then(() => {
-        alert("Logged out successfully");
-        listings.innerHTML = "";
-      })
-      .catch(error => alert("Logout error: " + error.message));
-  });
-
-  // Post EC Button
-  postECBtn.addEventListener("click", showCreateForm);
-
-  // Submit Listing
-  submitBtn.addEventListener("click", function() {
-    const title = document.getElementById("title").value.trim();
-    const desc = document.getElementById("desc").value.trim();
-    const loc = document.getElementById("location").value;
-    const field = document.getElementById("field").value;
-    const type = document.getElementById("type").value;
-    const telegram = document.getElementById("telegram").value.trim();
-
-    if (!title || !desc || !loc || !field || !type) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-
-    const user = auth.currentUser;
-    if (!user) {
-      alert("Please log in to post.");
-      return;
-    }
-
-    db.ref("posts").push({
-      title,
-      desc,
-      location: loc,
-      field,
-      type,
-      telegram,
-      uid: user.uid,
-      timestamp: Date.now()
-    })
-    .then(() => {
-      showToast();
-      document.getElementById("createListingSection").style.display = "none";
-      ["title", "desc", "telegram"].forEach(id => document.getElementById(id).value = "");
-      ["location", "field", "type"].forEach(id => document.getElementById(id).selectedIndex = 0);
-      filterBtn.click();
-    })
-    .catch(err => alert("Error submitting post: " + err.message));
-  });
-
-  // Filter Listings
-  filterBtn.addEventListener("click", function() {
-    const fLoc = document.getElementById("filter-location").value;
-    const fField = document.getElementById("filter-field").value;
-
-    db.ref("posts").once("value").then(snapshot => {
-      listings.innerHTML = "";
-      let found = false;
-      
-      snapshot.forEach(child => {
-        const post = child.val();
-        if ((!fLoc || post.location === fLoc) && (!fField || post.field === fField)) {
-          found = true;
-          listings.innerHTML += `
-            <div class="card mt-2">
-              <div class="card-body">
-                <h5>${post.title}</h5>
-                <p>${post.desc}</p>
-                <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
-                <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
-              </div>
-            </div>
-          `;
+      // Show Create Form Function
+      function showCreateForm() {
+        const user = auth.currentUser;
+        if (!user) {
+          new bootstrap.Modal(document.getElementById("loginPromptModal")).show();
+          return;
         }
-      });
-
-      if (!found) {
-        listings.innerHTML = `<p class="text-muted mt-3">No opportunities match your filters.</p>`;
+        const section = document.getElementById("createListingSection");
+        section.style.display = "block";
+        section.scrollIntoView({ behavior: "smooth" });
       }
-    }).catch(error => {
-      console.error("Error fetching posts:", error);
-      listings.innerHTML = `<p class="text-danger mt-3">Failed to load opportunities.</p>`;
+
+      // Show Toast Notification
+      function showToast() {
+        new bootstrap.Toast(document.getElementById("postToast")).show();
+      }
+
+      // Auth State Listener
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          logoutBtn.classList.remove("hide");
+          postECBtn.classList.remove("hide");
+        } else {
+          logoutBtn.classList.add("hide");
+          document.getElementById("createListingSection").style.display = "none";
+        }
+      });
+
+      // Login Form Submission
+      loginForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        const email = document.getElementById("loginEmail").value;
+        const password = document.getElementById("loginPassword").value;
+        
+        auth.signInWithEmailAndPassword(email, password)
+          .then(() => {
+            bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+            document.getElementById("loginEmail").value = "";
+            document.getElementById("loginPassword").value = "";
+          })
+          .catch(error => {
+            let errorMessage = "Login failed. ";
+            if (error.code === "auth/wrong-password" || error.code === "auth/user-not-found") {
+              errorMessage += "Invalid email or password.";
+            } else {
+              errorMessage += error.message;
+            }
+            alert(errorMessage);
+          });
+      });
+
+      // Register Form Submission
+      registerForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        const email = document.getElementById("registerEmail").value;
+        const password = document.getElementById("registerPassword").value;
+        
+        auth.createUserWithEmailAndPassword(email, password)
+          .then(() => {
+            alert("Registered successfully!");
+            bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+          })
+          .catch(error => alert(error.message));
+      });
+
+      // Logout Function
+      logoutBtn.addEventListener("click", function() {
+        auth.signOut()
+          .then(() => {
+            alert("Logged out successfully");
+            listings.innerHTML = "";
+          })
+          .catch(error => alert("Logout error: " + error.message));
+      });
+
+      // Post EC Button
+      postECBtn.addEventListener("click", showCreateForm);
+
+      // Submit Listing
+      submitBtn.addEventListener("click", function() {
+        const title = document.getElementById("title").value.trim();
+        const desc = document.getElementById("desc").value.trim();
+        const loc = document.getElementById("location").value;
+        const field = document.getElementById("field").value;
+        const type = document.getElementById("type").value;
+        const telegram = document.getElementById("telegram").value.trim();
+
+        if (!title || !desc || !loc || !field || !type) {
+          alert("Please fill in all required fields.");
+          return;
+        }
+
+        const user = auth.currentUser;
+        if (!user) {
+          alert("Please log in to post.");
+          return;
+        }
+
+        db.ref("posts").push({
+          title,
+          desc,
+          location: loc,
+          field,
+          type,
+          telegram,
+          uid: user.uid,
+          timestamp: Date.now()
+        })
+        .then(() => {
+          showToast();
+          document.getElementById("createListingSection").style.display = "none";
+          ["title", "desc", "telegram"].forEach(id => document.getElementById(id).value = "");
+          ["location", "field", "type"].forEach(id => document.getElementById(id).selectedIndex = 0);
+          filterBtn.click();
+        })
+        .catch(err => alert("Error submitting post: " + err.message));
+      });
+
+      // Filter Listings
+      filterBtn.addEventListener("click", function() {
+        const fLoc = document.getElementById("filter-location").value;
+        const fField = document.getElementById("filter-field").value;
+
+        db.ref("posts").once("value").then(snapshot => {
+          listings.innerHTML = "";
+          let found = false;
+          
+          snapshot.forEach(child => {
+            const post = child.val();
+            if ((!fLoc || post.location === fLoc) && (!fField || post.field === fField)) {
+              found = true;
+              listings.innerHTML += `
+                <div class="card mt-2">
+                  <div class="card-body">
+                    <h5>${post.title}</h5>
+                    <p>${post.desc}</p>
+                    <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
+                    <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
+                  </div>
+                </div>
+              `;
+            }
+          });
+
+          if (!found) {
+            listings.innerHTML = `<p class="text-muted mt-3">No opportunities match your filters.</p>`;
+          }
+        }).catch(error => {
+          console.error("Error fetching posts:", error);
+          listings.innerHTML = `<p class="text-danger mt-3">Failed to load opportunities.</p>`;
+        });
+      });
+
+      // Initial load of listings
+      filterBtn.click();
     });
-  });
-
-  // Initial load of listings
-  filterBtn.click();
-});
-</script>
-
+  </script>
 </body>
 </html>
-
