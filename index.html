@@ -270,49 +270,36 @@ postECBtn.onclick = showCreateForm;
 
 
   // SUBMIT POST
-submitBtn.onclick = () => {
-  const user = auth.currentUser;
-  if (!user) {
-    const modal = new bootstrap.Modal(document.getElementById("loginPromptModal"));
-    modal.show();
-    return;
-  }
+filterBtn.onclick = () => {
+  const fLoc = document.getElementById('filter-location').value;
+  const fField = document.getElementById('filter-field').value;
 
-  const loc = document.getElementById('location').value;
-  const field = document.getElementById('field').value;
-  const type = document.getElementById('type').value;
-  const title = document.getElementById('title').value;
-  const desc = document.getElementById('desc').value;
-  const telegram = document.getElementById("telegram").value.trim();
+  db.ref('posts').once('value').then(snapshot => {
+    listings.innerHTML = '';
+    let found = false;
+    snapshot.forEach(child => {
+      const post = child.val();
+      if ((fLoc === '' || post.location === fLoc) && (fField === '' || post.field === fField)) {
+        found = true;
+        listings.innerHTML += `
+          <div class="card mt-2">
+            <div class="card-body">
+              <h5>${post.title}</h5>
+              <p>${post.desc}</p>
+              <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
+              <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
+            </div>
+          </div>
+        `;
+      }
+    });
 
-  if (!title || !desc || !loc || !field || !type) {
-    alert('Fill all fields');
-    return;
-  }
-
-  const newPostRef = db.ref('posts').push();
-  newPostRef.set({
-    title,
-    desc,
-    location: loc,
-    field,
-    type,
-    telegram,
-    uid: user.uid  // ✅ safer access to UID
-  }).then(() => {
-    showToast();
-    document.getElementById("createListingSection").style.display = "none"; 
-    document.getElementById('title').value = '';
-    document.getElementById('desc').value = '';
-    document.getElementById('telegram').value = '';
-    document.getElementById('location').selectedIndex = 0;
-    document.getElementById('field').selectedIndex = 0;
-    document.getElementById('type').selectedIndex = 0;
-
-    listings.scrollIntoView({ behavior: 'smooth' });
-
-  }).catch(err => {
-    alert("Failed to post: " + err.message);
+    if (!found) {
+      listings.innerHTML = `<p class="text-muted mt-3">No opportunities match your filters. Please try again later.</p>`;
+    }
+  }).catch(error => {
+    console.error("Error fetching posts:", error);
+    listings.innerHTML = `<p class="text-danger mt-3">Failed to load opportunities. Please try again later.</p>`;
   });
 };
 
