@@ -203,7 +203,64 @@
         <i class="bi bi-person-plus"></i> Register
       </button>
     </div>
+<!--modal--!>
+<!-- Auth Modal -->
+<div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="authModalLabel">Log In</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Login Form -->
+        <form id="loginForm">
+          <div class="mb-3">
+            <label for="loginEmail" class="form-label">Email</label>
+            <input type="email" class="form-control" id="loginEmail" required>
+          </div>
+          <div class="mb-3">
+            <label for="loginPassword" class="form-label">Password</label>
+            <input type="password" class="form-control" id="loginPassword" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Log In</button>
+        </form>
+        
+        <!-- Register Form -->
+        <form id="registerForm" class="mt-4">
+          <div class="mb-3">
+            <label for="registerEmail" class="form-label">Email</label>
+            <input type="email" class="form-control" id="registerEmail" required>
+          </div>
+          <div class="mb-3">
+            <label for="registerPassword" class="form-label">Password (6+ characters)</label>
+            <input type="password" class="form-control" id="registerPassword" required minlength="6">
+          </div>
+          <button type="submit" class="btn btn-success w-100">Register</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
+<!-- Login Prompt Modal -->
+<div class="modal fade" id="loginPromptModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title">Login Required</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>You need to log in or register to perform this action.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="openAuthFromPrompt('login')">Log In</button>
+        <button class="btn btn-success" onclick="openAuthFromPrompt('register')">Register</button>
+      </div>
+    </div>
+  </div>
+</div>
     <!-- User Controls (for logged in state) -->
     <div id="userControls" class="d-flex justify-content-end gap-2 my-4 hide">
       <button id="logoutBtn" class="btn btn-danger">
@@ -299,22 +356,22 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-    function updateUI(user) {
-      if (user) {
-        document.getElementById('authButtons').classList.add('hide');
-        document.getElementById('userControls').classList.remove('hide');
-        document.getElementById('postECBtn').textContent = 'Post Opportunity';
-        document.getElementById('showMyPostsBtn').classList.remove('hide');
-        document.getElementById('showMyEnrollmentsBtn').classList.remove('hide');
-      } else {
-        document.getElementById('authButtons').classList.remove('hide');
-        document.getElementById('userControls').classList.add('hide');
-        document.getElementById('postECBtn').textContent = 'Post Opportunity (Login Required)';
-        document.getElementById('showMyPostsBtn').classList.add('hide');
-        document.getElementById('showMyEnrollmentsBtn').classList.add('hide');
-      }
-      loadListings(currentFilter);
-    }
+ function updateUI(user) {
+  if (user) {
+    document.getElementById('authButtons').classList.add('hide');
+    document.getElementById('userControls').classList.remove('hide');
+    document.getElementById('postECBtn').textContent = 'Post Opportunity';
+    document.getElementById('showMyPostsBtn').classList.remove('hide');
+    document.getElementById('showMyEnrollmentsBtn').classList.remove('hide');
+  } else {
+    document.getElementById('authButtons').classList.remove('hide');
+    document.getElementById('userControls').classList.add('hide');
+    document.getElementById('postECBtn').textContent = 'Post Opportunity (Login Required)';
+    document.getElementById('showMyPostsBtn').classList.add('hide');
+    document.getElementById('showMyEnrollmentsBtn').classList.add('hide');
+  }
+  loadListings(currentFilter);
+}
       // Firebase Configuration and Initialization
       const firebaseConfig = {
         apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
@@ -765,6 +822,31 @@
     behavior: 'smooth',
     block: 'start'
   });
+        loginForm.addEventListener("submit", function(e) {
+  e.preventDefault();
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+  
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+      document.getElementById("loginEmail").value = "";
+      document.getElementById("loginPassword").value = "";
+    })
+    .catch(error => {
+      let errorMessage = "Login failed. ";
+      if (error.code === "auth/wrong-password") {
+        errorMessage += "Incorrect password.";
+      } else if (error.code === "auth/user-not-found") {
+        errorMessage += "No account found with this email.";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage += "Invalid email format.";
+      } else {
+        errorMessage += error.message;
+      }
+      alert(errorMessage);
+    });
+});
   
 
  filterBtn.click();
