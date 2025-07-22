@@ -265,6 +265,51 @@ auth.onAuthStateChanged(user => {
 
 
 postECBtn.onclick = showCreateForm;
+submitBtn.onclick = () => {
+  const title = document.getElementById('title').value.trim();
+  const desc = document.getElementById('desc').value.trim();
+  const loc = document.getElementById('location').value;
+  const field = document.getElementById('field').value;
+  const type = document.getElementById('type').value;
+  const telegram = document.getElementById('telegram').value.trim();
+
+  if (!title || !desc || !loc || !field || !type) {
+    alert("Please fill in all required fields.");
+    return;
+  }
+
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Please log in to post.");
+    return;
+  }
+
+  const newPostRef = db.ref('posts').push();
+  newPostRef.set({
+    title,
+    desc,
+    location: loc,
+    field,
+    type,
+    telegram,
+    uid: user.uid,
+    timestamp: Date.now()
+  })
+  .then(() => {
+    showToast(); // ✅ Toast notification
+    document.getElementById("createListingSection").style.display = "none";
+
+    // Optionally clear fields:
+    ['title', 'desc', 'telegram'].forEach(id => document.getElementById(id).value = '');
+    ['location', 'field', 'type'].forEach(id => document.getElementById(id).selectedIndex = 0);
+
+    filterBtn.onclick(); // refresh listings
+  })
+  .catch(err => {
+    alert("Error submitting post: " + err.message);
+  });
+};
+
 
 
 
