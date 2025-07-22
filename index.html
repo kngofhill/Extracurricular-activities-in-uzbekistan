@@ -14,22 +14,25 @@
     .card { margin-top: 1rem; }
     .hide { display: none; }
     .enrolled-users {
-  margin-top: 15px;
-  border-top: 1px solid #eee;
-  padding-top: 10px;
-}
+      margin-top: 15px;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+    }
     .enrolled-user {
-  background: #f8f9fa;
-  padding: 8px;
-  margin: 5px 0;
-  border-radius: 5px;
-}
+      background: #f8f9fa;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 5px;
+    }
     #listings .card {
       margin-bottom: 1rem;
     }
     .modal-content {
       border-radius: 1rem;
       border: none;
+    }
+    .filter-buttons {
+      margin-bottom: 1rem;
     }
   </style>
 </head>
@@ -92,6 +95,11 @@
     <!-- Filter Section -->
     <div id="filter-section" class="mt-4">
       <h3>Filter Listings</h3>
+      <div class="filter-buttons">
+        <button id="showAllBtn" class="btn btn-outline-primary">Show All</button>
+        <button id="showMyPostsBtn" class="btn btn-outline-secondary hide">My Posts</button>
+        <button id="showMyEnrollmentsBtn" class="btn btn-outline-info hide">My Enrollments</button>
+      </div>
       <div class="d-flex flex-column flex-md-row gap-2">
         <select id="filter-location" class="form-control">
           <option value="">All Locations</option>
@@ -165,8 +173,8 @@
         </div>
       </div>
     </div>
-  </div>
-      <!-- Enroll Modal -->
+
+    <!-- Enroll Modal -->
     <div class="modal fade" id="enrollModal" tabindex="-1" aria-labelledby="enrollModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -234,7 +242,13 @@
       const postECBtn = document.getElementById("postECBtn");
       const submitBtn = document.getElementById("submitBtn");
       const filterBtn = document.getElementById("filterBtn");
+      const showAllBtn = document.getElementById("showAllBtn");
+      const showMyPostsBtn = document.getElementById("showMyPostsBtn");
+      const showMyEnrollmentsBtn = document.getElementById("showMyEnrollmentsBtn");
       const listings = document.getElementById("listings");
+
+      // Current filter state
+      let currentFilter = "all"; // 'all', 'myPosts', 'myEnrollments'
 
       // Show Auth Modal Function
       window.showAuth = function(type) {
@@ -278,8 +292,12 @@
         if (user) {
           logoutBtn.classList.remove("hide");
           postECBtn.classList.remove("hide");
+          showMyPostsBtn.classList.remove("hide");
+          showMyEnrollmentsBtn.classList.remove("hide");
         } else {
           logoutBtn.classList.add("hide");
+          showMyPostsBtn.classList.add("hide");
+          showMyEnrollmentsBtn.classList.add("hide");
           document.getElementById("createListingSection").style.display = "none";
         }
       });
@@ -295,6 +313,7 @@
             bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
             document.getElementById("loginEmail").value = "";
             document.getElementById("loginPassword").value = "";
+            filterBtn.click(); // Refresh listings
           })
           .catch(error => {
             let errorMessage = "Login failed. ";
@@ -327,6 +346,7 @@
           .then(() => {
             alert("Logged out successfully");
             listings.innerHTML = "";
+            currentFilter = "all";
           })
           .catch(error => alert("Logout error: " + error.message));
       });
@@ -375,145 +395,227 @@
       });
 
       // Filter Listings
-       filterBtn.addEventListener("click", function() {
-    const fLoc = document.getElementById("filter-location").value;
-    const fField = document.getElementById("filter-field").value;
-    const user = auth.currentUser;
+      function loadListings(filterType = "all") {
+        const fLoc = document.getElementById("filter-location").value;
+        const fField = document.getElementById("filter-field").value;
+        const user = auth.currentUser;
 
-    db.ref("posts").once("value").then(snapshot => {
-      listings.innerHTML = "";
-      let found = false;
-      
-      snapshot.forEach(child => {
-        const post = child.val();
-        const postId = child.key;
+        db.ref("posts").once("value").then(snapshot => {
+          listings.innerHTML = "";
+          let found = false;
+          
+          snapshot.forEach(child => {
+            const post = child.val();
+            const postId = child.key;
+            
+            // Apply filters based on filterType
+            let showPost = true;
+            if (filterType === "myPosts" && (!user || user.uid !== post.uid)) {
+              showPost = false;
+            }
+            
+            if (showPost && (!fLoc || post.location === fLoc) && (!fField || post.field === fField)) {
+              found = true;
+              
+              // Check if current user is the post owner
+              const isOwner = user && user.uid === post.uid;
+              
+              let enrollmentsSection = '';
+              if (isOwner) {
+                enrollmentsSection = `
+                  <div class="enrolled-users">
+                    <button class="btn btn-sm btn-info view-enrollments" data-post-id="${postId}">
+                      View Enrollments
+                    </button>
+                    <div id="enrollments-${postId}" class="mt-2"></div>
+                  </div>
+                `;
+              }
+              
+              listings.innerHTML += `
+                <div class="card mt-2" data-post-id="${postId}">
+                  <div class="card-body">
+                    <h5>${post.title}</h5>
+                    <p>${post.desc}</p>
+                    <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
+                    <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
+                    <button class="btn btn-primary enroll-btn" data-post-id="${postId}">
+                      Enroll
+                    </button>
+                    ${enrollmentsSection}
+                  </div>
+                </div>
+              `;
+            }
+          });
+
+          if (!found) {
+            listings.innerHTML = `<p class="text-muted mt-3">No opportunities match your filters.</p>`;
+          } else {
+            // Add event listeners to all enroll buttons
+            document.querySelectorAll(".enroll-btn").forEach(btn => {
+              btn.addEventListener("click", function() {
+                const postId = this.getAttribute("data-post-id");
+                if (!auth.currentUser) {
+                  alert("Please register or log in to enroll.");
+                  showAuth('login');
+                  return;
+                }
+                document.getElementById("enrollPostId").value = postId;
+                new bootstrap.Modal(document.getElementById("enrollModal")).show();
+              });
+            });
+
+            // Add event listeners to view enrollments buttons
+            document.querySelectorAll(".view-enrollments").forEach(btn => {
+              btn.addEventListener("click", function() {
+                const postId = this.getAttribute("data-post-id");
+                viewEnrollments(postId);
+              });
+            });
+          }
+        }).catch(error => {
+          console.error("Error fetching posts:", error);
+          listings.innerHTML = `<p class="text-danger mt-3">Failed to load opportunities.</p>`;
+        });
+      }
+
+      // Filter button click handler
+      filterBtn.addEventListener("click", function() {
+        loadListings(currentFilter);
+      });
+
+      // Show All button
+      showAllBtn.addEventListener("click", function() {
+        currentFilter = "all";
+        loadListings();
+      });
+
+      // Show My Posts button
+      showMyPostsBtn.addEventListener("click", function() {
+        currentFilter = "myPosts";
+        loadListings("myPosts");
+      });
+
+      // Show My Enrollments button
+      showMyEnrollmentsBtn.addEventListener("click", function() {
+        const user = auth.currentUser;
+        if (!user) {
+          alert("Please log in to view your enrollments.");
+          return;
+        }
         
-        if ((!fLoc || post.location === fLoc) && (!fField || post.field === fField)) {
-          found = true;
+        db.ref("enrollments").once("value").then(snapshot => {
+          const enrolledPostIds = [];
+          snapshot.forEach(postSnapshot => {
+            if (postSnapshot.hasChild(user.uid)) {
+              enrolledPostIds.push(postSnapshot.key);
+            }
+          });
           
-          // Check if current user is the post owner
-          const isOwner = user && user.uid === post.uid;
-          
-          let enrollmentsSection = '';
-          if (isOwner) {
-            enrollmentsSection = `
-              <div class="enrolled-users">
-                <button class="btn btn-sm btn-info view-enrollments" data-post-id="${postId}">
-                  View Enrollments
-                </button>
-                <div id="enrollments-${postId}" class="mt-2"></div>
-              </div>
-            `;
+          if (enrolledPostIds.length === 0) {
+            listings.innerHTML = `<p class="text-muted mt-3">You haven't enrolled in any opportunities yet.</p>`;
+            return;
           }
           
-          listings.innerHTML += `
-            <div class="card mt-2" data-post-id="${postId}">
-              <div class="card-body">
-                <h5>${post.title}</h5>
-                <p>${post.desc}</p>
-                <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
-                <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
-                <button class="btn btn-primary enroll-btn" data-post-id="${postId}">
-                  Enroll
-                </button>
-                ${enrollmentsSection}
-              </div>
-            </div>
-          `;
+          // Now fetch and display only the posts the user has enrolled in
+          db.ref("posts").once("value").then(postsSnapshot => {
+            listings.innerHTML = "";
+            let found = false;
+            
+            postsSnapshot.forEach(postChild => {
+              const post = postChild.val();
+              const postId = postChild.key;
+              
+              if (enrolledPostIds.includes(postId)) {
+                found = true;
+                listings.innerHTML += `
+                  <div class="card mt-2" data-post-id="${postId}">
+                    <div class="card-body">
+                      <h5>${post.title}</h5>
+                      <p>${post.desc}</p>
+                      <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
+                      <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
+                    </div>
+                  </div>
+                `;
+              }
+            });
+            
+            if (!found) {
+              listings.innerHTML = `<p class="text-muted mt-3">No enrolled opportunities found.</p>`;
+            }
+          });
+        });
+      });
+
+      // Enroll Form Submission
+      document.getElementById("enrollForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const postId = document.getElementById("enrollPostId").value;
+        const telegram = document.getElementById("enrollTelegram").value.trim();
+        const phone = document.getElementById("enrollPhone").value.trim();
+        const user = auth.currentUser;
+
+        if (!user) {
+          alert("Please log in to enroll.");
+          return;
         }
+
+        const enrollmentData = {
+          userId: user.uid,
+          userEmail: user.email,
+          telegram,
+          phone,
+          timestamp: Date.now()
+        };
+
+        db.ref(`enrollments/${postId}/${user.uid}`).set(enrollmentData)
+          .then(() => {
+            alert("Enrollment successful!");
+            bootstrap.Modal.getInstance(document.getElementById("enrollModal")).hide();
+            document.getElementById("enrollForm").reset();
+            loadListings(currentFilter); // Refresh listings with current filter
+          })
+          .catch(error => alert("Enrollment error: " + error.message));
       });
 
-      if (!found) {
-        listings.innerHTML = `<p class="text-muted mt-3">No opportunities match your filters.</p>`;
-      } else {
-        // Add event listeners to all enroll buttons
-        document.querySelectorAll(".enroll-btn").forEach(btn => {
-          btn.addEventListener("click", function() {
-            const postId = this.getAttribute("data-post-id");
-            document.getElementById("enrollPostId").value = postId;
-            new bootstrap.Modal(document.getElementById("enrollModal")).show();
+      // Function to view enrollments
+      function viewEnrollments(postId) {
+        const enrolledUsersList = document.getElementById("enrolledUsersList");
+        enrolledUsersList.innerHTML = "<p>Loading enrollments...</p>";
+        
+        db.ref(`enrollments/${postId}`).once("value").then(snapshot => {
+          if (!snapshot.exists()) {
+            enrolledUsersList.innerHTML = "<p>No enrollments yet.</p>";
+            return;
+          }
+          
+          let html = '<div class="list-group">';
+          snapshot.forEach(child => {
+            const enrollment = child.val();
+            html += `
+              <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                  <h6 class="mb-1">${enrollment.userEmail}</h6>
+                  <small>${new Date(enrollment.timestamp).toLocaleString()}</small>
+                </div>
+                <p class="mb-1">Telegram: ${enrollment.telegram}</p>
+                <small>Phone: ${enrollment.phone}</small>
+              </div>
+            `;
           });
-        });
-
-        // Add event listeners to view enrollments buttons
-        document.querySelectorAll(".view-enrollments").forEach(btn => {
-          btn.addEventListener("click", function() {
-            const postId = this.getAttribute("data-post-id");
-            viewEnrollments(postId);
-          });
+          html += '</div>';
+          enrolledUsersList.innerHTML = html;
+          
+          new bootstrap.Modal(document.getElementById("viewEnrollmentsModal")).show();
+        }).catch(error => {
+          enrolledUsersList.innerHTML = `<p class="text-danger">Error loading enrollments: ${error.message}</p>`;
         });
       }
-    }).catch(error => {
-      console.error("Error fetching posts:", error);
-      listings.innerHTML = `<p class="text-danger mt-3">Failed to load opportunities.</p>`;
-    });
-  });
-    document.getElementById("enrollForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-    const postId = document.getElementById("enrollPostId").value;
-    const telegram = document.getElementById("enrollTelegram").value.trim();
-    const phone = document.getElementById("enrollPhone").value.trim();
-    const user = auth.currentUser;
-
-    if (!user) {
-      alert("Please log in to enroll.");
-      return;
-    }
-
-    const enrollmentData = {
-      userId: user.uid,
-      userEmail: user.email,
-      telegram,
-      phone,
-      timestamp: Date.now()
-    };
-
-    db.ref(`enrollments/${postId}/${user.uid}`).set(enrollmentData)
-      .then(() => {
-        alert("Enrollment successful!");
-        bootstrap.Modal.getInstance(document.getElementById("enrollModal")).hide();
-        document.getElementById("enrollForm").reset();
-        filterBtn.click(); // Refresh listings
-      })
-      .catch(error => alert("Enrollment error: " + error.message));
-  });
-
-  // Function to view enrollments
-  function viewEnrollments(postId) {
-    const enrolledUsersList = document.getElementById("enrolledUsersList");
-    enrolledUsersList.innerHTML = "<p>Loading enrollments...</p>";
-    
-    db.ref(`enrollments/${postId}`).once("value").then(snapshot => {
-      if (!snapshot.exists()) {
-        enrolledUsersList.innerHTML = "<p>No enrollments yet.</p>";
-        return;
-      }
-      
-      let html = '<div class="list-group">';
-      snapshot.forEach(child => {
-        const enrollment = child.val();
-        html += `
-          <div class="list-group-item">
-            <div class="d-flex w-100 justify-content-between">
-              <h6 class="mb-1">${enrollment.userEmail}</h6>
-              <small>${new Date(enrollment.timestamp).toLocaleString()}</small>
-            </div>
-            <p class="mb-1">Telegram: ${enrollment.telegram}</p>
-            <small>Phone: ${enrollment.phone}</small>
-          </div>
-        `;
-      });
-      html += '</div>';
-      enrolledUsersList.innerHTML = html;
-      
-      new bootstrap.Modal(document.getElementById("viewEnrollmentsModal")).show();
-    }).catch(error => {
-      enrolledUsersList.innerHTML = `<p class="text-danger">Error loading enrollments: ${error.message}</p>`;
-    });
-  }
 
       // Initial load of listings
-      filterBtn.click();
+      loadListings();
     });
   </script>
 </body>
