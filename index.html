@@ -175,46 +175,8 @@
   
 
 <script>
-
-document.addEventListener("DOMContentLoaded", function()  {
-function showAuth(type) {
-  const loginForm = document.getElementById("loginForm");
-  const registerForm = document.getElementById("registerForm");
-
-  if (type === "login") {
-    loginForm.style.display = "block";
-    registerForm.style.display = "none";
-    document.getElementById("authModalLabel").innerText = "Log In";
-  } else {
-    loginForm.style.display = "none";
-    registerForm.style.display = "block";
-    document.getElementById("authModalLabel").innerText = "Register";
-  }
-
-  const modal = new bootstrap.Modal(document.getElementById("authModal"));
-  modal.show();
-}
-function openAuthFromPrompt(type) {
-  const promptModal = bootstrap.Modal.getInstance(document.getElementById("loginPromptModal"));
-  promptModal.hide();
-  showAuth(type);
-}
-
-
-function showCreateForm() {
-  const user = auth.currentUser;
-  if (!user) {
-    const modal = new bootstrap.Modal(document.getElementById("loginPromptModal"));
-    modal.show();
-    return;
-  }
-  const section = document.getElementById("createListingSection");
-  section.style.display = "block";
-  section.scrollIntoView({ behavior: "smooth" });
-}
-
-
-
+document.addEventListener("DOMContentLoaded", function() {
+  // Firebase Configuration and Initialization
   const firebaseConfig = {
     apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
     authDomain: "extracurricularsuzbekistan.firebaseapp.com",
@@ -226,173 +188,196 @@ function showCreateForm() {
     measurementId: "G-Z53076ZBCJ"
   };
 
-  firebase.initializeApp(firebaseConfig);
+  // Initialize Firebase
+  const app = firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.database();
 
-// Auth fields inside the modal
-  const loginEmail = document.getElementById('loginEmail');
-  const loginPassword = document.getElementById('loginPassword');
-  const registerEmail = document.getElementById('registerEmail');
-  const registerPassword = document.getElementById('registerPassword');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const submitBtn = document.getElementById('submitBtn');
-  const filterBtn = document.getElementById('filterBtn');
-  const filterSection = document.getElementById('filter-section');
-  const listings = document.getElementById('listings');
+  // DOM Elements
+  const loginForm = document.getElementById("loginForm");
+  const registerForm = document.getElementById("registerForm");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const postECBtn = document.getElementById("postECBtn");
+  const submitBtn = document.getElementById("submitBtn");
+  const filterBtn = document.getElementById("filterBtn");
+  const listings = document.getElementById("listings");
 
-  function showToast() {
-    const toast = new bootstrap.Toast(document.getElementById("postToast"));
-    toast.show();
-  }
-
- 
-
-  // AUTH STATE LISTENER
-const postECBtn = document.getElementById('postECBtn');
-
-auth.onAuthStateChanged(user => {
-  postECBtn.classList.remove('hide');
-
-  if (user) {
-    logoutBtn.classList.remove('hide');
-  } else {
-    logoutBtn.classList.add('hide');
-    document.getElementById("createListingSection").style.display = "none"; // 🔴 Hide form on logout
-  }
-
-});
-
-
-postECBtn.onclick = showCreateForm;
-submitBtn.onclick = () => {
-  const title = document.getElementById('title').value.trim();
-  const desc = document.getElementById('desc').value.trim();
-  const loc = document.getElementById('location').value;
-  const field = document.getElementById('field').value;
-  const type = document.getElementById('type').value;
-  const telegram = document.getElementById('telegram').value.trim();
-
-  if (!title || !desc || !loc || !field || !type) {
-    alert("Please fill in all required fields.");
-    return;
-  }
-
-  const user = auth.currentUser;
-  if (!user) {
-    alert("Please log in to post.");
-    return;
-  }
-
-  const newPostRef = db.ref('posts').push();
-  newPostRef.set({
-    title,
-    desc,
-    location: loc,
-    field,
-    type,
-    telegram,
-    uid: user.uid,
-    timestamp: Date.now()
-  })
-  .then(() => {
-    showToast(); // ✅ Toast notification
-    document.getElementById("createListingSection").style.display = "none";
-
-    // Optionally clear fields:
-    ['title', 'desc', 'telegram'].forEach(id => document.getElementById(id).value = '');
-    ['location', 'field', 'type'].forEach(id => document.getElementById(id).selectedIndex = 0);
-
-    filterBtn.onclick(); // refresh listings
-  })
-  .catch(err => {
-    alert("Error submitting post: " + err.message);
-  });
-};
-
-
-
-
-
-  // SUBMIT POST
-filterBtn.onclick = () => {
-  const fLoc = document.getElementById('filter-location').value;
-  const fField = document.getElementById('filter-field').value;
-
-  db.ref('posts').once('value').then(snapshot => {
-    listings.innerHTML = '';
-    let found = false;
-    snapshot.forEach(child => {
-      const post = child.val();
-      if ((fLoc === '' || post.location === fLoc) && (fField === '' || post.field === fField)) {
-        found = true;
-        listings.innerHTML += `
-          <div class="card mt-2">
-            <div class="card-body">
-              <h5>${post.title}</h5>
-              <p>${post.desc}</p>
-              <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
-              <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
-            </div>
-          </div>
-        `;
-      }
-    });
-
-    if (!found) {
-      listings.innerHTML = `<p class="text-muted mt-3">No opportunities match your filters. Please try again later.</p>`;
+  // Show Auth Modal Function
+  function showAuth(type) {
+    if (type === "login") {
+      loginForm.style.display = "block";
+      registerForm.style.display = "none";
+      document.getElementById("authModalLabel").innerText = "Log In";
+    } else {
+      loginForm.style.display = "none";
+      registerForm.style.display = "block";
+      document.getElementById("authModalLabel").innerText = "Register";
     }
-  }).catch(error => {
-    console.error("Error fetching posts:", error);
-    listings.innerHTML = `<p class="text-danger mt-3">Failed to load opportunities. Please try again later.</p>`;
+    new bootstrap.Modal(document.getElementById("authModal")).show();
+  }
+
+  // Open Auth From Prompt
+  function openAuthFromPrompt(type) {
+    bootstrap.Modal.getInstance(document.getElementById("loginPromptModal")).hide();
+    showAuth(type);
+  }
+
+  // Show Create Form Function
+  function showCreateForm() {
+    const user = auth.currentUser;
+    if (!user) {
+      new bootstrap.Modal(document.getElementById("loginPromptModal")).show();
+      return;
+    }
+    const section = document.getElementById("createListingSection");
+    section.style.display = "block";
+    section.scrollIntoView({ behavior: "smooth" });
+  }
+
+  // Show Toast Notification
+  function showToast() {
+    new bootstrap.Toast(document.getElementById("postToast")).show();
+  }
+
+  // Auth State Listener
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      logoutBtn.classList.remove("hide");
+      postECBtn.classList.remove("hide");
+    } else {
+      logoutBtn.classList.add("hide");
+      document.getElementById("createListingSection").style.display = "none";
+    }
   });
-};
 
-  
-  // REGISTER
-// REGISTER
-document.getElementById("registerForm").onsubmit = (e) => {
-  e.preventDefault();
-  auth.createUserWithEmailAndPassword(registerEmail.value, registerPassword.value)
-    .then(() => {
-      alert('Registered successfully');
-      bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+  // Login Form Submission
+  loginForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+    
+    auth.signInWithEmailAndPassword(email, password)
+      .then(() => {
+        bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+        document.getElementById("loginEmail").value = "";
+        document.getElementById("loginPassword").value = "";
+      })
+      .catch(error => {
+        let errorMessage = "Login failed. ";
+        if (error.code === "auth/wrong-password" || error.code === "auth/user-not-found") {
+          errorMessage += "Invalid email or password.";
+        } else {
+          errorMessage += error.message;
+        }
+        alert(errorMessage);
+      });
+  });
+
+  // Register Form Submission
+  registerForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const email = document.getElementById("registerEmail").value;
+    const password = document.getElementById("registerPassword").value;
+    
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(() => {
+        alert("Registered successfully!");
+        bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+      })
+      .catch(error => alert(error.message));
+  });
+
+  // Logout Function
+  logoutBtn.addEventListener("click", function() {
+    auth.signOut()
+      .then(() => {
+        alert("Logged out successfully");
+        listings.innerHTML = "";
+      })
+      .catch(error => alert("Logout error: " + error.message));
+  });
+
+  // Post EC Button
+  postECBtn.addEventListener("click", showCreateForm);
+
+  // Submit Listing
+  submitBtn.addEventListener("click", function() {
+    const title = document.getElementById("title").value.trim();
+    const desc = document.getElementById("desc").value.trim();
+    const loc = document.getElementById("location").value;
+    const field = document.getElementById("field").value;
+    const type = document.getElementById("type").value;
+    const telegram = document.getElementById("telegram").value.trim();
+
+    if (!title || !desc || !loc || !field || !type) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    const user = auth.currentUser;
+    if (!user) {
+      alert("Please log in to post.");
+      return;
+    }
+
+    db.ref("posts").push({
+      title,
+      desc,
+      location: loc,
+      field,
+      type,
+      telegram,
+      uid: user.uid,
+      timestamp: Date.now()
     })
-    .catch(e => alert(e.message));
-};
-filterBtn.onclick(); // Reload unfiltered listings
-
-// LOGIN
-document.getElementById("loginForm").onsubmit = (e) => {
-  e.preventDefault();
-  auth.signInWithEmailAndPassword(loginEmail.value, loginPassword.value)
     .then(() => {
-      alert('Signed in successfully');
-
-      // ✅ Close the modal
-      bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
-
-      // ✅ Scroll to "Post" button after successful login
-      document.getElementById("postECBtn").scrollIntoView({ behavior: "smooth" });
+      showToast();
+      document.getElementById("createListingSection").style.display = "none";
+      ["title", "desc", "telegram"].forEach(id => document.getElementById(id).value = "");
+      ["location", "field", "type"].forEach(id => document.getElementById(id).selectedIndex = 0);
+      filterBtn.click();
     })
-    .catch(e => alert(e.message));
-};
- // Reload unfiltered listings
-  logoutBtn.onclick = () => {
-    auth.signOut().then(() => {
-      alert('Logged out');
-      listings.innerHTML = '';
-      document.getElementById("createListingSection").style.display = "none"; // 🔴 HIDE POST FORM
+    .catch(err => alert("Error submitting post: " + err.message));
+  });
 
+  // Filter Listings
+  filterBtn.addEventListener("click", function() {
+    const fLoc = document.getElementById("filter-location").value;
+    const fField = document.getElementById("filter-field").value;
+
+    db.ref("posts").once("value").then(snapshot => {
+      listings.innerHTML = "";
+      let found = false;
+      
+      snapshot.forEach(child => {
+        const post = child.val();
+        if ((!fLoc || post.location === fLoc) && (!fField || post.field === fField)) {
+          found = true;
+          listings.innerHTML += `
+            <div class="card mt-2">
+              <div class="card-body">
+                <h5>${post.title}</h5>
+                <p>${post.desc}</p>
+                <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
+                <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      if (!found) {
+        listings.innerHTML = `<p class="text-muted mt-3">No opportunities match your filters.</p>`;
+      }
+    }).catch(error => {
+      console.error("Error fetching posts:", error);
+      listings.innerHTML = `<p class="text-danger mt-3">Failed to load opportunities.</p>`;
     });
-  };
+  });
 
-
-
-  filterBtn.onclick();
+  // Initial load of listings
+  filterBtn.click();
 });
-
-
 </script>
 
 </body>
