@@ -303,36 +303,7 @@ filterBtn.onclick = () => {
   });
 };
 
-  // FILTER POSTS
-  filterBtn.onclick = () => {
-    const fLoc = document.getElementById('filter-location').value;
-    const fField = document.getElementById('filter-field').value;
-
-  db.ref('posts').once('value', snapshot => {
-    listings.innerHTML = '';
-    let found = false;
-    snapshot.forEach(child => {
-      const post = child.val();
-      if ((fLoc === '' || post.location === fLoc) && (fField === '' || post.field === fField)) {
-        found = true;
-        listings.innerHTML += `
-          <div class="card">
-            <div class="card-body">
-              <h5>${post.title}</h5>
-              <p>${post.desc}</p>
-              <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
-              <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
-            </div>
-          </div>
-        `;
-      }
-    });
-
-  if (!found) {
-    listings.innerHTML = `<p class="text-muted mt-3">No opportunities match your filters. Please try again later.</p>`;
-  }
-});
-  };
+  
   // REGISTER
 // REGISTER
 document.getElementById("registerForm").onsubmit = (e) => {
