@@ -288,7 +288,7 @@ postECBtn.onclick = showCreateForm;
       field,
       type,
       telegram,
-      uid: auth.currentUser.uid
+      uid: user.uid
     }).then(() => {
       showToast();
       document.getElementById("createListingSection").style.display = "none"; 
