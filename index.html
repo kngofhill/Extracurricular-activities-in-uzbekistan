@@ -758,16 +758,17 @@
         });
       }
       
-         document.querySelector('.get-started-btn').addEventListener('click', function() {
-        const user = auth.currentUser;
-        if (user) {
-          // If logged in, scroll to opportunities
-          document.getElementById('filter-section').scrollIntoView({ behavior: 'smooth' });
-        } else {
-          // If not logged in, show registration
-          showAuth('register');
-        }
-      });
+      document.querySelector('.get-started-btn').addEventListener('click', function(e) {
+  e.preventDefault();
+  // Smoothly scroll to the listings section
+  document.getElementById('listings').scrollIntoView({ 
+    behavior: 'smooth',
+    block: 'start'
+  });
+  
+
+ filterBtn.click();
+});
       // Initial load of listings
       loadListings();
     });
