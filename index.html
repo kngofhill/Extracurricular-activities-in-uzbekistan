@@ -175,29 +175,7 @@
   
 
 <script>
-  function showAuth(type) {
-    const loginForm = document.getElementById("loginForm");
-    const registerForm = document.getElementById("registerForm");
 
-    if (type === "login") {
-      loginForm.style.display = "block";
-      registerForm.style.display = "none";
-      document.getElementById("authModalLabel").innerText = "Log In";
-    } else {
-      loginForm.style.display = "none";
-      registerForm.style.display = "block";
-      document.getElementById("authModalLabel").innerText = "Register";
-    }
-
-    const modal = new bootstrap.Modal(document.getElementById("authModal"));
-    modal.show();
-  }
-
-  function openAuthFromPrompt(type) {
-    const promptModal = bootstrap.Modal.getInstance(document.getElementById("loginPromptModal"));
-    promptModal.hide();
-    showAuth(type);
-  }
 document.addEventListener("DOMContentLoaded", function()  {
 function showAuth(type) {
   const loginForm = document.getElementById("loginForm");
@@ -283,7 +261,6 @@ auth.onAuthStateChanged(user => {
     document.getElementById("createListingSection").style.display = "none"; // 🔴 Hide form on logout
   }
 
-  filterBtn.onclick();
 });
 
 
@@ -323,7 +300,7 @@ postECBtn.onclick = showCreateForm;
       document.getElementById('type').selectedIndex = 0;
 
       listings.scrollIntoView({ behavior: 'smooth' });
-      filterBtn.onclick();
+
     }).catch(err => {
       alert("Failed to post: " + err.message);
     });
@@ -387,15 +364,16 @@ document.getElementById("loginForm").onsubmit = (e) => {
     })
     .catch(e => alert(e.message));
 };
-  filterBtn.onclick(); // Reload unfiltered listings
+ // Reload unfiltered listings
   logoutBtn.onclick = () => {
     auth.signOut().then(() => {
       alert('Logged out');
       listings.innerHTML = '';
       document.getElementById("createListingSection").style.display = "none"; // 🔴 HIDE POST FORM
-      filterBtn.onclick();
+
     });
   };
+  filterBtn.onclick();
 
 
 
