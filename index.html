@@ -254,7 +254,7 @@
       <h1 class="display-4 fw-bold mb-3">🚀 EC Connect Uzbekistan</h1>
       <p class="lead mb-4">Discover amazing extracurricular opportunities to boost your skills and university applications!</p>
       <div class="d-flex justify-content-center gap-3 flex-wrap">
-        <button class="btn btn-light btn-lg pulse-animation get-started-btn" onclick="showAuth('register')">
+        <button class="btn btn-light btn-lg pulse-animation get-started-btn">
           <i class="bi bi-rocket-takeoff"></i> Get Started
         </button>
         <button id="postECBtn" class="btn btn-outline-light btn-lg">
@@ -1288,7 +1288,7 @@
           behavior: 'smooth',
           block: 'start'
         });
-        filterBtn.click();
+        // Removed the filterBtn.click() if you don't want to trigger the filter
       });
 
       // Initial load of listings
