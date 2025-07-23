@@ -11,41 +11,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
   <style>
-        .opportunity-card {
-      border-left: 4px solid var(--primary);
-      transition: all 0.3s ease;
-    }
-    
-    .opportunity-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-    
-    .opportunity-header {
-      background: linear-gradient(135deg, rgba(106, 17, 203, 0.05) 0%, rgba(37, 117, 252, 0.05) 100%);
-      padding: 1rem;
-      border-radius: 12px 12px 0 0;
-    }
-    
-    .opportunity-footer {
-      background-color: rgba(248, 249, 250, 0.7);
-      border-radius: 0 0 12px 12px;
-    }
-    
-    .highlight-badge {
-      background: linear-gradient(to right, #ff8a00, #ff4d4d);
-      color: white;
-      font-weight: bold;
-      padding: 0.25rem 0.75rem;
-      border-radius: 50px;
-    }
-    
-    .get-started-btn {
-      background: linear-gradient(to right, #ff4d4d, #f9cb28);
-      border: none;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
     :root {
       --primary: #6a11cb;
       --secondary: #2575fc;
@@ -67,6 +32,62 @@
       padding: 3rem;
       margin-bottom: 2rem;
       box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      background-size: 200% auto;
+      animation: gradientBG 15s ease infinite;
+    }
+    
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .opportunity-card {
+      border-left: 4px solid var(--primary);
+      transition: all 0.3s ease;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .opportunity-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    .opportunity-header {
+      background: linear-gradient(135deg, rgba(106, 17, 203, 0.05) 0%, rgba(37, 117, 252, 0.05) 100%);
+      padding: 1rem;
+      border-radius: 12px 12px 0 0;
+    }
+    
+    .opportunity-footer {
+      background-color: rgba(248, 249, 250, 0.7);
+      border-radius: 0 0 12px 12px;
+      margin-top: auto;
+    }
+    
+    .highlight-badge {
+      background: linear-gradient(to right, #ff8a00, #ff4d4d);
+      color: white;
+      font-weight: bold;
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
+    
+    .get-started-btn {
+      background: linear-gradient(to right, #ff4d4d, #f9cb28);
+      border: none;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: all 0.3s;
+    }
+    
+    .get-started-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(255, 77, 77, 0.4);
     }
     
     .card {
@@ -83,18 +104,13 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
     
-    .card-header {
-      background: linear-gradient(to right, var(--primary), var(--secondary));
-      color: white;
-      font-weight: bold;
-    }
-    
     .btn-primary {
       background: var(--primary);
       border: none;
       padding: 0.5rem 1.5rem;
       border-radius: 50px;
       font-weight: 600;
+      transition: all 0.3s;
     }
     
     .btn-primary:hover {
@@ -109,15 +125,11 @@
       border-radius: 50px;
       font-weight: 600;
       box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+      transition: all 0.3s;
     }
     
-    .btn-outline-primary {
-      color: var(--primary);
-      border-color: var(--primary);
-    }
-    
-    .btn-outline-primary:hover {
-      background: var(--primary);
+    .btn-success:hover {
+      transform: scale(1.05);
     }
     
     .category-badge {
@@ -175,6 +187,63 @@
       font-size: 2.5rem;
       color: var(--primary);
       margin-bottom: 1rem;
+      transition: all 0.3s;
+    }
+    
+    .feature-icon:hover {
+      transform: scale(1.1);
+      color: var(--secondary);
+    }
+    
+    /* Improved form styles */
+    .form-control, .form-select {
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(0,0,0,0.1);
+      transition: all 0.3s;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.25rem rgba(106, 17, 203, 0.25);
+    }
+    
+    /* Loading spinner */
+    .spinner-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .hero-section {
+        padding: 2rem 1rem;
+      }
+      
+      .filter-buttons .btn {
+        margin-bottom: 0.5rem;
+        width: 100%;
+      }
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--secondary);
     }
   </style>
 </head>
@@ -184,7 +253,7 @@
     <div class="hero-section text-center">
       <h1 class="display-4 fw-bold mb-3">🚀 EC Connect Uzbekistan</h1>
       <p class="lead mb-4">Discover amazing extracurricular opportunities to boost your skills and university applications!</p>
-      <div class="d-flex justify-content-center gap-3">
+      <div class="d-flex justify-content-center gap-3 flex-wrap">
         <button class="btn btn-light btn-lg pulse-animation get-started-btn" onclick="showAuth('register')">
           <i class="bi bi-rocket-takeoff"></i> Get Started
         </button>
@@ -203,64 +272,109 @@
         <i class="bi bi-person-plus"></i> Register
       </button>
     </div>
-<!--modal--!>
-<!-- Auth Modal -->
-<div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="authModalLabel">Log In</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Login Form -->
-        <form id="loginForm">
-          <div class="mb-3">
-            <label for="loginEmail" class="form-label">Email</label>
-            <input type="email" class="form-control" id="loginEmail" required>
-          </div>
-          <div class="mb-3">
-            <label for="loginPassword" class="form-label">Password</label>
-            <input type="password" class="form-control" id="loginPassword" required>
-          </div>
-          <button type="submit" class="btn btn-primary w-100">Log In</button>
-        </form>
-        
-        <!-- Register Form -->
-        <form id="registerForm" class="mt-4">
-          <div class="mb-3">
-            <label for="registerEmail" class="form-label">Email</label>
-            <input type="email" class="form-control" id="registerEmail" required>
-          </div>
-          <div class="mb-3">
-            <label for="registerPassword" class="form-label">Password (6+ characters)</label>
-            <input type="password" class="form-control" id="registerPassword" required minlength="6">
-          </div>
-          <button type="submit" class="btn btn-success w-100">Register</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Login Prompt Modal -->
-<div class="modal fade" id="loginPromptModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header bg-warning">
-        <h5 class="modal-title">Login Required</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p>You need to log in or register to perform this action.</p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" onclick="openAuthFromPrompt('login')">Log In</button>
-        <button class="btn btn-success" onclick="openAuthFromPrompt('register')">Register</button>
+    <!-- Auth Modal -->
+    <div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="authModalLabel">Log In</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Login Form -->
+            <form id="loginForm">
+              <div class="mb-3">
+                <label for="loginEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="loginEmail" required>
+              </div>
+              <div class="mb-3">
+                <label for="loginPassword" class="form-label">Password</label>
+                <div class="input-group">
+                  <input type="password" class="form-control" id="loginPassword" required>
+                  <button class="btn btn-outline-secondary" type="button" id="toggleLoginPassword">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">
+                <span id="loginBtnText">Log In</span>
+                <span id="loginSpinner" class="spinner-border spinner-border-sm ms-2 hide" role="status" aria-hidden="true"></span>
+              </button>
+              <div class="text-center mt-2">
+                <a href="#" onclick="showPasswordReset()">Forgot password?</a>
+              </div>
+            </form>
+            
+            <!-- Register Form -->
+            <form id="registerForm" class="mt-4 hide">
+              <div class="mb-3">
+                <label for="registerEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="registerEmail" required>
+              </div>
+              <div class="mb-3">
+                <label for="registerPassword" class="form-label">Password (6+ characters)</label>
+                <div class="input-group">
+                  <input type="password" class="form-control" id="registerPassword" required minlength="6">
+                  <button class="btn btn-outline-secondary" type="button" id="toggleRegisterPassword">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+                <div class="form-text">Use at least 6 characters with a mix of letters and numbers</div>
+              </div>
+              <button type="submit" class="btn btn-success w-100">
+                <span id="registerBtnText">Register</span>
+                <span id="registerSpinner" class="spinner-border spinner-border-sm ms-2 hide" role="status" aria-hidden="true"></span>
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+
+    <!-- Password Reset Modal -->
+    <div class="modal fade" id="passwordResetModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Reset Password</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="passwordResetForm">
+              <div class="mb-3">
+                <label for="resetEmail" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="resetEmail" required>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">
+                <span id="resetBtnText">Send Reset Link</span>
+                <span id="resetSpinner" class="spinner-border spinner-border-sm ms-2 hide" role="status" aria-hidden="true"></span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Prompt Modal -->
+    <div class="modal fade" id="loginPromptModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-warning">
+            <h5 class="modal-title">Login Required</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>You need to log in or register to perform this action.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" onclick="openAuthFromPrompt('login')">Log In</button>
+            <button class="btn btn-success" onclick="openAuthFromPrompt('register')">Register</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- User Controls (for logged in state) -->
     <div id="userControls" class="d-flex justify-content-end gap-2 my-4 hide">
       <button id="logoutBtn" class="btn btn-danger">
@@ -296,7 +410,7 @@
     <!-- Filter Section -->
     <div id="filter-section" class="mt-4 bg-white p-4 rounded-3 shadow-sm">
       <h3 class="mb-3"><i class="bi bi-funnel"></i> Find Your Perfect Opportunity</h3>
-      <div class="filter-buttons mb-3">
+      <div class="filter-buttons mb-3 d-flex flex-wrap gap-2">
         <button id="showAllBtn" class="btn btn-outline-primary">All Opportunities</button>
         <button id="showMyPostsBtn" class="btn btn-outline-secondary hide">My Posts</button>
         <button id="showMyEnrollmentsBtn" class="btn btn-outline-info hide">My Enrollments</button>
@@ -307,14 +421,26 @@
           <option>Tashkent</option>
           <option>Samarkand</option>
           <option>Bukhara</option>
-          <!-- Other locations -->
+          <option>Andijan</option>
+          <option>Fergana</option>
+          <option>Namangan</option>
+          <option>Khorezm</option>
+          <option>Karakalpakstan</option>
+          <option>Jizzakh</option>
+          <option>Kashkadarya</option>
+          <option>Surkhandarya</option>
+          <option>Syrdarya</option>
+          <option>Navoi</option>
+          <option>Gulistan</option>
         </select>
         <select id="filter-field" class="form-select">
           <option value="">All Fields</option>
           <option>STEM</option>
           <option>Business</option>
           <option>Art</option>
-          <!-- Other fields -->
+          <option>Leadership</option>
+          <option>Debate</option>
+          <option>Writing</option>
         </select>
         <button id="filterBtn" class="btn btn-primary">
           <i class="bi bi-search"></i> Search
@@ -323,17 +449,91 @@
     </div>
 
     <!-- Listings -->
-   <div id="listings" class="mt-4 row g-4"></div>
+    <div id="listings" class="mt-4 row g-4"></div>
 
     <!-- Create Listing Form -->
     <div id="createListingSection" class="mt-4 bg-white p-4 rounded-3 shadow-sm" style="display: none;">
       <h3 class="mb-3"><i class="bi bi-plus-circle"></i> Create New Opportunity</h3>
-      <!-- Form fields remain the same -->
+      <form id="createOpportunityForm">
+        <div class="mb-3">
+          <label for="title" class="form-label">Title*</label>
+          <input type="text" class="form-control" id="title" placeholder="Enter opportunity title" required>
+        </div>
+        
+        <div class="mb-3">
+          <label for="desc" class="form-label">Description*</label>
+          <textarea class="form-control" id="desc" rows="4" placeholder="Describe the opportunity in detail" required></textarea>
+          <div class="form-text">Minimum 50 characters</div>
+        </div>
+        
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label for="location" class="form-label">Location*</label>
+            <select id="location" class="form-select" required>
+              <option value="" disabled selected>Select location</option>
+              <option>Tashkent</option>
+              <option>Samarkand</option>
+              <option>Bukhara</option>
+              <option>Andijan</option>
+              <option>Fergana</option>
+              <option>Namangan</option>
+              <option>Khorezm</option>
+              <option>Karakalpakstan</option>
+              <option>Jizzakh</option>
+              <option>Kashkadarya</option>
+              <option>Surkhandarya</option>
+              <option>Syrdarya</option>
+              <option>Navoi</option>
+              <option>Gulistan</option>
+            </select>
+          </div>
+          
+          <div class="col-md-4">
+            <label for="field" class="form-label">Field*</label>
+            <select id="field" class="form-select" required>
+              <option value="" disabled selected>Select field</option>
+              <option>STEM</option>
+              <option>Business</option>
+              <option>Art</option>
+              <option>Leadership</option>
+              <option>Debate</option>
+              <option>Writing</option>
+            </select>
+          </div>
+          
+          <div class="col-md-4">
+            <label for="type" class="form-label">Type*</label>
+            <select id="type" class="form-select" required>
+              <option value="" disabled selected>Select type</option>
+              <option>Competition</option>
+              <option>Internship</option>
+              <option>Volunteering</option>
+              <option>Online Course</option>
+              <option>Workshop</option>
+              <option>Club</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="telegram" class="form-label">Telegram Contact</label>
+          <div class="input-group">
+            <span class="input-group-text">@</span>
+            <input type="text" class="form-control" id="telegram" placeholder="username (without @)">
+          </div>
+        </div>
+        
+        <div class="d-flex justify-content-between mt-4">
+          <button type="button" id="cancelBtn" class="btn btn-outline-secondary">Cancel</button>
+          <button type="submit" id="submitBtn" class="btn btn-primary">
+            <span id="submitBtnText">Post Opportunity</span>
+            <span id="submitSpinner" class="spinner-border spinner-border-sm ms-2 hide" role="status" aria-hidden="true"></span>
+          </button>
+        </div>
+      </form>
     </div>
 
-    <!-- All modals remain the same but now with better styling -->
-    
-    <!-- View Enrollments Modal (updated) -->
+    <!-- View Enrollments Modal -->
     <div class="modal fade" id="viewEnrollmentsModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -352,26 +552,53 @@
         </div>
       </div>
     </div>
+
+    <!-- Enroll Modal -->
+    <div class="modal fade" id="enrollModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Join Opportunity</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="enrollForm">
+              <input type="hidden" id="enrollPostId">
+              <div class="mb-3">
+                <label for="enrollTelegram" class="form-label">Telegram Username</label>
+                <div class="input-group">
+                  <span class="input-group-text">@</span>
+                  <input type="text" class="form-control" id="enrollTelegram" placeholder="username (without @)">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="enrollPhone" class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="enrollPhone" placeholder="+998901234567">
+              </div>
+              <button type="submit" class="btn btn-primary w-100">
+                <span id="enrollBtnText">Submit Enrollment</span>
+                <span id="enrollSpinner" class="spinner-border spinner-border-sm ms-2 hide" role="status" aria-hidden="true"></span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="postToast" class="toast position-fixed bottom-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header bg-success text-white">
+        <strong class="me-auto">Success</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        Your opportunity has been posted successfully!
+      </div>
+    </div>
   </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
- function updateUI(user) {
-  if (user) {
-    document.getElementById('authButtons').classList.add('hide');
-    document.getElementById('userControls').classList.remove('hide');
-    document.getElementById('postECBtn').textContent = 'Post Opportunity';
-    document.getElementById('showMyPostsBtn').classList.remove('hide');
-    document.getElementById('showMyEnrollmentsBtn').classList.remove('hide');
-  } else {
-    document.getElementById('authButtons').classList.remove('hide');
-    document.getElementById('userControls').classList.add('hide');
-    document.getElementById('postECBtn').textContent = 'Post Opportunity (Login Required)';
-    document.getElementById('showMyPostsBtn').classList.add('hide');
-    document.getElementById('showMyEnrollmentsBtn').classList.add('hide');
-  }
-  loadListings(currentFilter);
-}
       // Firebase Configuration and Initialization
       const firebaseConfig = {
         apiKey: "AIzaSyD__OINWiM7cLVx0pGsT3kBbZxrjBm23c0",
@@ -392,14 +619,19 @@
       // DOM Elements
       const loginForm = document.getElementById("loginForm");
       const registerForm = document.getElementById("registerForm");
+      const passwordResetForm = document.getElementById("passwordResetForm");
       const logoutBtn = document.getElementById("logoutBtn");
       const postECBtn = document.getElementById("postECBtn");
+      const createOpportunityForm = document.getElementById("createOpportunityForm");
       const submitBtn = document.getElementById("submitBtn");
+      const cancelBtn = document.getElementById("cancelBtn");
       const filterBtn = document.getElementById("filterBtn");
       const showAllBtn = document.getElementById("showAllBtn");
       const showMyPostsBtn = document.getElementById("showMyPostsBtn");
       const showMyEnrollmentsBtn = document.getElementById("showMyEnrollmentsBtn");
       const listings = document.getElementById("listings");
+      const toggleLoginPassword = document.getElementById("toggleLoginPassword");
+      const toggleRegisterPassword = document.getElementById("toggleRegisterPassword");
 
       // Current filter state
       let currentFilter = "all"; // 'all', 'myPosts', 'myEnrollments'
@@ -407,15 +639,21 @@
       // Show Auth Modal Function
       window.showAuth = function(type) {
         if (type === "login") {
-          loginForm.style.display = "block";
-          registerForm.style.display = "none";
+          loginForm.classList.remove("hide");
+          registerForm.classList.add("hide");
           document.getElementById("authModalLabel").innerText = "Log In";
         } else {
-          loginForm.style.display = "none";
-          registerForm.style.display = "block";
+          loginForm.classList.add("hide");
+          registerForm.classList.remove("hide");
           document.getElementById("authModalLabel").innerText = "Register";
         }
         new bootstrap.Modal(document.getElementById("authModal")).show();
+      };
+
+      // Show Password Reset Modal
+      window.showPasswordReset = function() {
+        bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+        new bootstrap.Modal(document.getElementById("passwordResetModal")).show();
       };
 
       // Open Auth From Prompt
@@ -423,6 +661,39 @@
         bootstrap.Modal.getInstance(document.getElementById("loginPromptModal")).hide();
         showAuth(type);
       };
+
+      // Toggle Password Visibility
+      toggleLoginPassword.addEventListener("click", function() {
+        const passwordInput = document.getElementById("loginPassword");
+        const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+        passwordInput.setAttribute("type", type);
+        this.innerHTML = type === "password" ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+      });
+
+      toggleRegisterPassword.addEventListener("click", function() {
+        const passwordInput = document.getElementById("registerPassword");
+        const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+        passwordInput.setAttribute("type", type);
+        this.innerHTML = type === "password" ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+      });
+
+      // Update UI based on auth state
+      function updateUI(user) {
+        if (user) {
+          document.getElementById('authButtons').classList.add('hide');
+          document.getElementById('userControls').classList.remove('hide');
+          document.getElementById('postECBtn').textContent = 'Post Opportunity';
+          document.getElementById('showMyPostsBtn').classList.remove('hide');
+          document.getElementById('showMyEnrollmentsBtn').classList.remove('hide');
+        } else {
+          document.getElementById('authButtons').classList.remove('hide');
+          document.getElementById('userControls').classList.add('hide');
+          document.getElementById('postECBtn').textContent = 'Post Opportunity (Login Required)';
+          document.getElementById('showMyPostsBtn').classList.add('hide');
+          document.getElementById('showMyEnrollmentsBtn').classList.add('hide');
+        }
+        loadListings(currentFilter);
+      }
 
       // Show Create Form Function
       function showCreateForm() {
@@ -434,120 +705,128 @@
         const section = document.getElementById("createListingSection");
         section.style.display = "block";
         section.scrollIntoView({ behavior: "smooth" });
+        document.getElementById("title").focus();
+      }
+
+      // Hide Create Form Function
+      function hideCreateForm() {
+        document.getElementById("createListingSection").style.display = "none";
+        document.getElementById("createOpportunityForm").reset();
       }
 
       // Show Toast Notification
-      function showToast() {
-        new bootstrap.Toast(document.getElementById("postToast")).show();
+      function showToast(message, isSuccess = true) {
+        const toastEl = document.getElementById("postToast");
+        const toastHeader = toastEl.querySelector(".toast-header");
+        const toastBody = toastEl.querySelector(".toast-body");
+        
+        if (isSuccess) {
+          toastHeader.className = "toast-header bg-success text-white";
+        } else {
+          toastHeader.className = "toast-header bg-danger text-white";
+        }
+        
+        toastBody.textContent = message;
+        new bootstrap.Toast(toastEl).show();
       }
 
-      // Auth State Listener
-        auth.onAuthStateChanged(user => {
-        updateUI(user);
-        
-        // Additional check for enrollments modal
-        const enrollModal = bootstrap.Modal.getInstance(document.getElementById("enrollModal"));
-        if (!user && enrollModal) {
-          enrollModal.hide();
-        }
-      });
-        loginForm.addEventListener("submit", function(e) {
-        e.preventDefault();
-        const email = document.getElementById("loginEmail").value;
-        const password = document.getElementById("loginPassword").value;
-        
-        auth.signInWithEmailAndPassword(email, password)
-          .then(() => {
-            bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
-            document.getElementById("loginEmail").value = "";
-            document.getElementById("loginPassword").value = "";
-            // No need to manually refresh - auth state listener will handle it
-          })
-          .catch(error => {
-            let errorMessage = "Login failed. ";
-            if (error.code === "auth/wrong-password" || error.code === "auth/user-not-found") {
-              errorMessage += "Invalid email or password.";
-            } else {
-              errorMessage += error.message;
-            }
-            alert(errorMessage);
-          });
-      });
-
-      // Register Form Submission
-      registerForm.addEventListener("submit", function(e) {
-        e.preventDefault();
-        const email = document.getElementById("registerEmail").value;
-        const password = document.getElementById("registerPassword").value;
-        
-        auth.createUserWithEmailAndPassword(email, password)
-          .then(() => {
-            alert("Registered successfully!");
-            bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
-          })
-          .catch(error => alert(error.message));
-      });
-
-      // Logout Function
-     logoutBtn.addEventListener("click", function() {
-        auth.signOut()
-          .then(() => {
-            // No alert needed - changes will be visible immediately
-            currentFilter = "all";
-            // No need to manually clear listings - auth state listener will handle it
-          })
-          .catch(error => console.error("Logout error:", error));
-      });
-
-
-      // Post EC Button
-      postECBtn.addEventListener("click", showCreateForm);
-
-      // Submit Listing
-      submitBtn.addEventListener("click", function() {
+      // Validate Form Function
+      function validateForm() {
         const title = document.getElementById("title").value.trim();
         const desc = document.getElementById("desc").value.trim();
         const loc = document.getElementById("location").value;
         const field = document.getElementById("field").value;
         const type = document.getElementById("type").value;
-        const telegram = document.getElementById("telegram").value.trim();
-
+        
         if (!title || !desc || !loc || !field || !type) {
-          alert("Please fill in all required fields.");
-          return;
+          showToast("Please fill in all required fields", false);
+          return false;
         }
+        
+        if (desc.length < 50) {
+          showToast("Description should be at least 50 characters", false);
+          return false;
+        }
+        
+        return true;
+      }
 
+      // Create New Opportunity Function
+      async function createNewOpportunity() {
+        if (!validateForm()) return false;
+        
         const user = auth.currentUser;
         if (!user) {
-          alert("Please log in to post.");
-          return;
+          showToast("Please log in to post opportunities", false);
+          return false;
         }
 
-        db.ref("posts").push({
-          title,
-          desc,
-          location: loc,
-          field,
-          type,
-          telegram,
-          uid: user.uid,
-          timestamp: Date.now()
-        })
-        .then(() => {
-          showToast();
-          document.getElementById("createListingSection").style.display = "none";
-          ["title", "desc", "telegram"].forEach(id => document.getElementById(id).value = "");
-          ["location", "field", "type"].forEach(id => document.getElementById(id).selectedIndex = 0);
-          filterBtn.click();
-        })
-        .catch(err => alert("Error submitting post: " + err.message));
-      });
+        try {
+          // Show loading state
+          document.getElementById("submitBtnText").textContent = "Posting...";
+          document.getElementById("submitSpinner").classList.remove("hide");
+          submitBtn.disabled = true;
+          
+          // Get form values
+          const title = document.getElementById("title").value.trim();
+          const desc = document.getElementById("desc").value.trim();
+          const loc = document.getElementById("location").value;
+          const field = document.getElementById("field").value;
+          const type = document.getElementById("type").value;
+          const telegram = document.getElementById("telegram").value.trim();
+
+          // Prepare data object
+          const opportunityData = {
+            title,
+            desc,
+            location: loc,
+            field,
+            type,
+            telegram: telegram || null,
+            uid: user.uid,
+            userEmail: user.email,
+            timestamp: Date.now()
+          };
+
+          // Save to Firebase
+          await db.ref("posts").push(opportunityData);
+          
+          // Show success message
+          showToast("Opportunity posted successfully!");
+          
+          // Reset form and hide it
+          hideCreateForm();
+          
+          // Refresh listings
+          loadListings(currentFilter);
+          
+          return true;
+        } catch (error) {
+          console.error("Error posting opportunity:", error);
+          showToast("Error posting opportunity: " + error.message, false);
+          return false;
+        } finally {
+          // Reset button state
+          document.getElementById("submitBtnText").textContent = "Post Opportunity";
+          document.getElementById("submitSpinner").classList.add("hide");
+          submitBtn.disabled = false;
+        }
+      }
 
       // Filter Listings
-        function loadListings(filterType = "all") {
+      function loadListings(filterType = "all") {
         const fLoc = document.getElementById("filter-location").value;
         const fField = document.getElementById("filter-field").value;
         const user = auth.currentUser;
+
+        // Show loading state
+        listings.innerHTML = `
+          <div class="col-12 spinner-container">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        `;
 
         db.ref("posts").once("value").then(snapshot => {
           listings.innerHTML = "";
@@ -568,6 +847,7 @@
               
               const isOwner = user && user.uid === post.uid;
               const isNew = Date.now() - post.timestamp < 86400000 * 3; // 3 days old
+              const postedDate = new Date(post.timestamp).toLocaleDateString();
               
               let enrollmentsSection = '';
               if (isOwner) {
@@ -590,6 +870,7 @@
                         <span class="category-badge ${post.field}">${post.field}</span>
                         <span class="category-badge ${post.type.replace(' ', '')}">${post.type}</span>
                       </div>
+                      <small class="text-muted">Posted on ${postedDate}</small>
                     </div>
                     <div class="card-body">
                       <p class="card-text">${post.desc}</p>
@@ -630,12 +911,12 @@
               </div>
             `;
           } else {
-            // Add event listeners
+            // Add event listeners to enroll buttons
             document.querySelectorAll(".enroll-btn").forEach(btn => {
               btn.addEventListener("click", function() {
                 const postId = this.getAttribute("data-post-id");
                 if (!auth.currentUser) {
-                  alert("Please register or log in to enroll.");
+                  showToast("Please register or log in to enroll", false);
                   showAuth('login');
                   return;
                 }
@@ -644,6 +925,7 @@
               });
             });
 
+            // Add event listeners to view enrollments buttons
             document.querySelectorAll(".view-enrollments").forEach(btn => {
               btn.addEventListener("click", function() {
                 const postId = this.getAttribute("data-post-id");
@@ -655,114 +937,14 @@
           listings.innerHTML = `
             <div class="col-12">
               <div class="alert alert-danger">
-                <i class="bi bi-exclamation-triangle-fill"></i> Error loading opportunities
+                <i class="bi bi-exclamation-triangle-fill"></i> Error loading opportunities: ${error.message}
               </div>
             </div>
           `;
         });
       }
 
-      // Filter button click handler
-      filterBtn.addEventListener("click", function() {
-        loadListings(currentFilter);
-      });
-
-      // Show All button
-      showAllBtn.addEventListener("click", function() {
-        currentFilter = "all";
-        loadListings();
-      });
-
-      // Show My Posts button
-      showMyPostsBtn.addEventListener("click", function() {
-        currentFilter = "myPosts";
-        loadListings("myPosts");
-      });
-
-      // Show My Enrollments button
-      showMyEnrollmentsBtn.addEventListener("click", function() {
-        const user = auth.currentUser;
-        if (!user) {
-          alert("Please log in to view your enrollments.");
-          return;
-        }
-        
-        db.ref("enrollments").once("value").then(snapshot => {
-          const enrolledPostIds = [];
-          snapshot.forEach(postSnapshot => {
-            if (postSnapshot.hasChild(user.uid)) {
-              enrolledPostIds.push(postSnapshot.key);
-            }
-          });
-          
-          if (enrolledPostIds.length === 0) {
-            listings.innerHTML = `<p class="text-muted mt-3">You haven't enrolled in any opportunities yet.</p>`;
-            return;
-          }
-          
-          // Now fetch and display only the posts the user has enrolled in
-          db.ref("posts").once("value").then(postsSnapshot => {
-            listings.innerHTML = "";
-            let found = false;
-            
-            postsSnapshot.forEach(postChild => {
-              const post = postChild.val();
-              const postId = postChild.key;
-              
-              if (enrolledPostIds.includes(postId)) {
-                found = true;
-                listings.innerHTML += `
-                  <div class="card mt-2" data-post-id="${postId}">
-                    <div class="card-body">
-                      <h5>${post.title}</h5>
-                      <p>${post.desc}</p>
-                      <p><strong>${post.field}</strong> - ${post.type}, ${post.location}</p>
-                      <p><strong>Telegram:</strong> ${post.telegram || "N/A"}</p>
-                    </div>
-                  </div>
-                `;
-              }
-            });
-            
-            if (!found) {
-              listings.innerHTML = `<p class="text-muted mt-3">No enrolled opportunities found.</p>`;
-            }
-          });
-        });
-      });
-
-      // Enroll Form Submission
-      document.getElementById("enrollForm").addEventListener("submit", function(e) {
-        e.preventDefault();
-        const postId = document.getElementById("enrollPostId").value;
-        const telegram = document.getElementById("enrollTelegram").value.trim();
-        const phone = document.getElementById("enrollPhone").value.trim();
-        const user = auth.currentUser;
-
-        if (!user) {
-          alert("Please log in to enroll.");
-          return;
-        }
-
-        const enrollmentData = {
-          userId: user.uid,
-          userEmail: user.email,
-          telegram,
-          phone,
-          timestamp: Date.now()
-        };
-
-        db.ref(`enrollments/${postId}/${user.uid}`).set(enrollmentData)
-          .then(() => {
-            alert("Enrollment successful!");
-            bootstrap.Modal.getInstance(document.getElementById("enrollModal")).hide();
-            document.getElementById("enrollForm").reset();
-            loadListings(currentFilter); // Refresh listings with current filter
-          })
-          .catch(error => alert("Enrollment error: " + error.message));
-      });
-
-      // Function to view enrollments
+      // View Enrollments
       function viewEnrollments(postId) {
         const enrolledUsersList = document.getElementById("enrolledUsersList");
         enrolledUsersList.innerHTML = `
@@ -798,8 +980,8 @@
                   <h6 class="mb-1">${enrollment.userEmail}</h6>
                   <small>${new Date(enrollment.timestamp).toLocaleString()}</small>
                 </div>
-                <p class="mb-1">Telegram: ${enrollment.telegram}</p>
-                <small>Phone: ${enrollment.phone}</small>
+                <p class="mb-1">Telegram: ${enrollment.telegram || "Not provided"}</p>
+                <small>Phone: ${enrollment.phone || "Not provided"}</small>
               </div>
             `;
           });
@@ -814,43 +996,301 @@
           `;
         });
       }
-      
-      document.querySelector('.get-started-btn').addEventListener('click', function(e) {
-  e.preventDefault();
-  // Smoothly scroll to the listings section
-  document.getElementById('listings').scrollIntoView({ 
-    behavior: 'smooth',
-    block: 'start'
-  });
-        loginForm.addEventListener("submit", function(e) {
-  e.preventDefault();
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
-  
-  auth.signInWithEmailAndPassword(email, password)
-    .then(() => {
-      bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
-      document.getElementById("loginEmail").value = "";
-      document.getElementById("loginPassword").value = "";
-    })
-    .catch(error => {
-      let errorMessage = "Login failed. ";
-      if (error.code === "auth/wrong-password") {
-        errorMessage += "Incorrect password.";
-      } else if (error.code === "auth/user-not-found") {
-        errorMessage += "No account found with this email.";
-      } else if (error.code === "auth/invalid-email") {
-        errorMessage += "Invalid email format.";
-      } else {
-        errorMessage += error.message;
-      }
-      alert(errorMessage);
-    });
-});
-  
 
- filterBtn.click();
-});
+      // Auth State Listener
+      auth.onAuthStateChanged(user => {
+        updateUI(user);
+        
+        // Close modals if user logs out
+        if (!user) {
+          const authModal = bootstrap.Modal.getInstance(document.getElementById("authModal"));
+          if (authModal) authModal.hide();
+          
+          const enrollModal = bootstrap.Modal.getInstance(document.getElementById("enrollModal"));
+          if (enrollModal) enrollModal.hide();
+        }
+      });
+
+      // Event Listeners
+      loginForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const email = document.getElementById("loginEmail").value;
+        const password = document.getElementById("loginPassword").value;
+        
+        try {
+          // Show loading state
+          document.getElementById("loginBtnText").textContent = "Logging in...";
+          document.getElementById("loginSpinner").classList.remove("hide");
+          
+          await auth.signInWithEmailAndPassword(email, password);
+          
+          bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+          document.getElementById("loginEmail").value = "";
+          document.getElementById("loginPassword").value = "";
+        } catch (error) {
+          let errorMessage = "Login failed. ";
+          if (error.code === "auth/wrong-password") {
+            errorMessage += "Incorrect password.";
+          } else if (error.code === "auth/user-not-found") {
+            errorMessage += "No account found with this email.";
+          } else if (error.code === "auth/invalid-email") {
+            errorMessage += "Invalid email format.";
+          } else {
+            errorMessage += error.message;
+          }
+          showToast(errorMessage, false);
+        } finally {
+          // Reset button state
+          document.getElementById("loginBtnText").textContent = "Log In";
+          document.getElementById("loginSpinner").classList.add("hide");
+        }
+      });
+
+      registerForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const email = document.getElementById("registerEmail").value;
+        const password = document.getElementById("registerPassword").value;
+        
+        try {
+          // Show loading state
+          document.getElementById("registerBtnText").textContent = "Registering...";
+          document.getElementById("registerSpinner").classList.remove("hide");
+          
+          await auth.createUserWithEmailAndPassword(email, password);
+          
+          showToast("Registered successfully!");
+          bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+        } catch (error) {
+          showToast("Registration failed: " + error.message, false);
+        } finally {
+          // Reset button state
+          document.getElementById("registerBtnText").textContent = "Register";
+          document.getElementById("registerSpinner").classList.add("hide");
+        }
+      });
+
+      passwordResetForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const email = document.getElementById("resetEmail").value;
+        
+        try {
+          // Show loading state
+          document.getElementById("resetBtnText").textContent = "Sending...";
+          document.getElementById("resetSpinner").classList.remove("hide");
+          
+          await auth.sendPasswordResetEmail(email);
+          
+          showToast("Password reset link sent to your email");
+          bootstrap.Modal.getInstance(document.getElementById("passwordResetModal")).hide();
+        } catch (error) {
+          showToast("Error sending reset link: " + error.message, false);
+        } finally {
+          // Reset button state
+          document.getElementById("resetBtnText").textContent = "Send Reset Link";
+          document.getElementById("resetSpinner").classList.add("hide");
+        }
+      });
+
+      logoutBtn.addEventListener("click", function() {
+        auth.signOut()
+          .then(() => {
+            currentFilter = "all";
+            showToast("Logged out successfully");
+          })
+          .catch(error => {
+            console.error("Logout error:", error);
+            showToast("Logout failed: " + error.message, false);
+          });
+      });
+
+      postECBtn.addEventListener("click", showCreateForm);
+      cancelBtn.addEventListener("click", hideCreateForm);
+      createOpportunityForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        await createNewOpportunity();
+      });
+
+      // Filter button click handler
+      filterBtn.addEventListener("click", function() {
+        loadListings(currentFilter);
+      });
+
+      // Show All button
+      showAllBtn.addEventListener("click", function() {
+        currentFilter = "all";
+        loadListings();
+      });
+
+      // Show My Posts button
+      showMyPostsBtn.addEventListener("click", function() {
+        currentFilter = "myPosts";
+        loadListings("myPosts");
+      });
+
+      // Show My Enrollments button
+      showMyEnrollmentsBtn.addEventListener("click", function() {
+        const user = auth.currentUser;
+        if (!user) {
+          showToast("Please log in to view your enrollments", false);
+          return;
+        }
+        
+        currentFilter = "myEnrollments";
+        
+        // Show loading state
+        listings.innerHTML = `
+          <div class="col-12 spinner-container">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        `;
+        
+        db.ref("enrollments").once("value").then(snapshot => {
+          const enrolledPostIds = [];
+          snapshot.forEach(postSnapshot => {
+            if (postSnapshot.hasChild(user.uid)) {
+              enrolledPostIds.push(postSnapshot.key);
+            }
+          });
+          
+          if (enrolledPostIds.length === 0) {
+            listings.innerHTML = `
+              <div class="col-12">
+                <div class="text-center py-5">
+                  <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
+                  <h4>No enrollments yet</h4>
+                  <p class="text-muted">You haven't enrolled in any opportunities yet</p>
+                </div>
+              </div>
+            `;
+            return;
+          }
+          
+          // Now fetch and display only the posts the user has enrolled in
+          db.ref("posts").once("value").then(postsSnapshot => {
+            listings.innerHTML = "";
+            let found = false;
+            
+            postsSnapshot.forEach(postChild => {
+              const post = postChild.val();
+              const postId = postChild.key;
+              
+              if (enrolledPostIds.includes(postId)) {
+                found = true;
+                const postedDate = new Date(post.timestamp).toLocaleDateString();
+                
+                listings.innerHTML += `
+                  <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 opportunity-card">
+                      <div class="opportunity-header">
+                        <h5 class="card-title">${post.title}</h5>
+                        <div class="d-flex flex-wrap gap-2 my-2">
+                          <span class="category-badge ${post.field}">${post.field}</span>
+                          <span class="category-badge ${post.type.replace(' ', '')}">${post.type}</span>
+                        </div>
+                        <small class="text-muted">Posted on ${postedDate}</small>
+                      </div>
+                      <div class="card-body">
+                        <p class="card-text">${post.desc}</p>
+                      </div>
+                      <div class="card-footer opportunity-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div>
+                            <span class="badge bg-light text-dark me-2">
+                              <i class="bi bi-geo-alt"></i> ${post.location}
+                            </span>
+                            ${post.telegram ? `
+                              <span class="badge bg-light text-dark">
+                                <i class="bi bi-telegram"></i> ${post.telegram}
+                              </span>
+                            ` : ''}
+                          </div>
+                          <button class="btn btn-outline-primary" data-post-id="${postId}">
+                            <i class="bi bi-eye"></i> View Details
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }
+            });
+            
+            if (!found) {
+              listings.innerHTML = `
+                <div class="col-12">
+                  <div class="text-center py-5">
+                    <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
+                    <h4>No enrollments found</h4>
+                    <p class="text-muted">You haven't enrolled in any opportunities yet</p>
+                  </div>
+                </div>
+              `;
+            }
+          });
+        }).catch(error => {
+          listings.innerHTML = `
+            <div class="col-12">
+              <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle-fill"></i> Error loading enrollments: ${error.message}
+              </div>
+            </div>
+          `;
+        });
+      });
+
+      // Enroll Form Submission
+      document.getElementById("enrollForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const postId = document.getElementById("enrollPostId").value;
+        const telegram = document.getElementById("enrollTelegram").value.trim();
+        const phone = document.getElementById("enrollPhone").value.trim();
+        const user = auth.currentUser;
+
+        if (!user) {
+          showToast("Please log in to enroll", false);
+          return;
+        }
+
+        try {
+          // Show loading state
+          document.getElementById("enrollBtnText").textContent = "Enrolling...";
+          document.getElementById("enrollSpinner").classList.remove("hide");
+          
+          const enrollmentData = {
+            userId: user.uid,
+            userEmail: user.email,
+            telegram: telegram || null,
+            phone: phone || null,
+            timestamp: Date.now()
+          };
+
+          await db.ref(`enrollments/${postId}/${user.uid}`).set(enrollmentData);
+          
+          showToast("Enrollment successful!");
+          bootstrap.Modal.getInstance(document.getElementById("enrollModal")).hide();
+          document.getElementById("enrollForm").reset();
+          loadListings(currentFilter);
+        } catch (error) {
+          showToast("Enrollment error: " + error.message, false);
+        } finally {
+          // Reset button state
+          document.getElementById("enrollBtnText").textContent = "Submit Enrollment";
+          document.getElementById("enrollSpinner").classList.add("hide");
+        }
+      });
+
+      // Get Started Button
+      document.querySelector('.get-started-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('listings').scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+        filterBtn.click();
+      });
+
       // Initial load of listings
       loadListings();
     });
