@@ -722,91 +722,114 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // Validate Form Function
-  function validateForm() {
+function validateForm() {
     const title = document.getElementById("title").value.trim();
     const desc = document.getElementById("desc").value.trim();
     const loc = document.getElementById("location").value;
     const field = document.getElementById("field").value;
     const type = document.getElementById("type").value;
     
-    if (!title || !desc || !loc || !field || !type) {
-      showToast("Please fill in all required fields", false);
-      return false;
+    if (!title) {
+        showToast("Please enter a title", false);
+        return false;
+    }
+    
+    if (!desc) {
+        showToast("Please enter a description", false);
+        return false;
     }
     
     if (desc.length < 50) {
-      showToast("Description should be at least 50 characters", false);
-      return false;
+        showToast("Description should be at least 50 characters", false);
+        return false;
+    }
+    
+    if (!loc) {
+        showToast("Please select a location", false);
+        return false;
+    }
+    
+    if (!field) {
+        showToast("Please select a field", false);
+        return false;
+    }
+    
+    if (!type) {
+        showToast("Please select a type", false);
+        return false;
     }
     
     return true;
-  }
+}
 
   // ======================
   // CORE FUNCTIONALITY
   // ======================
 
   // Create New Opportunity Function
-  async function createNewOpportunity() {
-    if (!validateForm()) return false;
+async function createNewOpportunity() {
+    // Validate first - don't proceed if validation fails
+    if (!validateForm()) {
+        return false; // validateForm() already shows the error toast
+    }
     
     const user = auth.currentUser;
     if (!user) {
-      showToast("Please log in to post opportunities", false);
-      return false;
+        showToast("Please log in to post opportunities", false);
+        return false;
     }
 
     try {
-      // Show loading state
-      document.getElementById("submitBtnText").textContent = "Posting...";
-      document.getElementById("submitSpinner").classList.remove("hide");
-      submitBtn.disabled = true;
-      
-      // Get form values
-      const title = document.getElementById("title").value.trim();
-      const desc = document.getElementById("desc").value.trim();
-      const loc = document.getElementById("location").value;
-      const field = document.getElementById("field").value;
-      const type = document.getElementById("type").value;
-      const telegram = document.getElementById("telegram").value.trim();
+        // Show loading state
+        document.getElementById("submitBtnText").textContent = "Posting...";
+        document.getElementById("submitSpinner").classList.remove("hide");
+        submitBtn.disabled = true;
+        
+        // Get form values
+        const title = document.getElementById("title").value.trim();
+        const desc = document.getElementById("desc").value.trim();
+        const loc = document.getElementById("location").value;
+        const field = document.getElementById("field").value;
+        const type = document.getElementById("type").value;
+        const telegram = document.getElementById("telegram").value.trim();
 
-      // Prepare data object
-      const opportunityData = {
-        title,
-        desc,
-        location: loc,
-        field,
-        type,
-        telegram: telegram || null,
-        uid: user.uid,
-        userEmail: user.email,
-        timestamp: Date.now()
-      };
+        // Prepare data object
+        const opportunityData = {
+            title,
+            desc,
+            location: loc,
+            field,
+            type,
+            telegram: telegram || null,
+            uid: user.uid,
+            userEmail: user.email,
+            timestamp: Date.now()
+        };
 
-      // Save to Firebase
-      await db.ref("posts").push(opportunityData);
-      
-      // Show success message
-      showToast("Opportunity posted successfully!");
-      
-      // Reset form and hide it
-      hideCreateForm();
-      
-      // Refresh listings
-      loadListings(currentFilter);
-      
-      return true;
+        // Save to Firebase
+        await db.ref("posts").push(opportunityData);
+        
+        // Only show success after successful Firebase write
+        showToast("Opportunity posted successfully!");
+        
+        // Reset form and hide it
+        hideCreateForm();
+        
+        // Refresh listings
+        loadListings(currentFilter);
+        
+        return true;
     } catch (error) {
-      console.error("Error posting opportunity:", error);
-      showToast("Error posting opportunity: " + error.message, false);
-      return false;
+        console.error("Error posting opportunity:", error);
+        showToast("Error posting opportunity: " + error.message, false);
+        return false;
     } finally {
-      // Reset button state
-      document.getElementById("submitBtnText").textContent = "Post Opportunity";
-      document.getElementById("submitSpinner").classList.add("hide");
-      submitBtn.disabled = false;
+        // Reset button state
+        document.getElementById("submitBtnText").textContent = "Post Opportunity";
+        document.getElementById("submitSpinner").classList.add("hide");
+        submitBtn.disabled = false;
     }
-  }
+}
 
   // Delete Opportunity Function
   async function deleteOpportunity(postId, deleteBtn) {
