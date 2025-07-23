@@ -730,47 +730,42 @@ function validateForm() {
     const type = document.getElementById("type").value;
     
     if (!title) {
-        showToast("Please enter a title", false);
-        return false;
+        return { valid: false, message: "Please enter a title" };
     }
     
     if (!desc) {
-        showToast("Please enter a description", false);
-        return false;
+        return { valid: false, message: "Please enter a description" };
     }
     
     if (desc.length < 50) {
-        showToast("Description should be at least 50 characters", false);
-        return false;
+        return { valid: false, message: "Description should be at least 50 characters" };
     }
     
-    if (!loc) {
-        showToast("Please select a location", false);
-        return false;
+    if (!loc || loc === "Select location") {
+        return { valid: false, message: "Please select a location" };
     }
     
-    if (!field) {
-        showToast("Please select a field", false);
-        return false;
+    if (!field || field === "Select field") {
+        return { valid: false, message: "Please select a field" };
     }
     
-    if (!type) {
-        showToast("Please select a type", false);
-        return false;
+    if (!type || type === "Select type") {
+        return { valid: false, message: "Please select a type" };
     }
     
-    return true;
+    return { valid: true };
 }
-
   // ======================
   // CORE FUNCTIONALITY
   // ======================
 
   // Create New Opportunity Function
 async function createNewOpportunity() {
-    // Validate first - don't proceed if validation fails
-    if (!validateForm()) {
-        return false; // validateForm() already shows the error toast
+    // Validate first
+    const validation = validateForm();
+    if (!validation.valid) {
+        showToast(validation.message, false);
+        return false;
     }
     
     const user = auth.currentUser;
