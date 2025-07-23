@@ -832,7 +832,6 @@
             listings.innerHTML += `
       <div class="col-md-6 col-lg-4">
         <div class="card h-100 opportunity-card">
-          <!-- ... existing card content ... -->
           <div class="card-footer opportunity-footer">
             ${isOwner ? `
               <button class="btn btn-sm btn-danger delete-btn" data-post-id="${postId}">
@@ -959,6 +958,39 @@
             </div>
           `;
         });
+        document.querySelectorAll(".delete-btn").forEach(btn => {
+  btn.addEventListener("click", async function() {
+    const postId = this.getAttribute("data-post-id");
+    const user = auth.currentUser;
+    
+    if (!user) {
+      showToast("Please log in to delete posts", false);
+      return;
+    }
+
+    if (confirm("Are you sure you want to delete this opportunity?")) {
+      // Show loading state
+      this.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+      this.disabled = true;
+
+      try {
+        // Delete from Firebase
+        await db.ref(`posts/${postId}`).remove();
+        
+        // Also delete any enrollments for this post
+        await db.ref(`enrollments/${postId}`).remove();
+        
+        // Optimistic UI removal
+        this.closest('.col-md-6').remove();
+        showToast("Opportunity deleted successfully");
+      } catch (error) {
+        showToast("Delete failed: " + error.message, false);
+        this.innerHTML = '<i class="bi bi-trash"></i> Delete';
+        this.disabled = false;
+      }
+    }
+  });
+});
       }
 
       // View Enrollments
@@ -1307,38 +1339,7 @@
         });
         // Removed the filterBtn.click() if you don't want to trigger the filter
       });
-      document.addEventListener('click', async (e) => {
-  if (e.target.closest('.delete-btn')) {
-    const postId = e.target.closest('.delete-btn').getAttribute('data-post-id');
-    const user = auth.currentUser;
-    
-    if (!user) {
-      showToast("Please log in to delete posts", false);
-      return;
-    }
-
-    if (confirm("Are you sure you want to delete this opportunity?")) {
-      const deleteBtn = e.target.closest('.delete-btn');
-      
-      // Show loading state
-      deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-      deleteBtn.disabled = true;
-
-      try {
-        // Delete from Firebase
-        await db.ref(`posts/${postId}`).remove();
-        
-        // Optimistic UI removal
-        deleteBtn.closest('.col-md-6').remove();
-        showToast("Opportunity deleted successfully");
-      } catch (error) {
-        showToast("Delete failed: " + error.message, false);
-        deleteBtn.innerHTML = '<i class="bi bi-trash"></i> Delete';
-        deleteBtn.disabled = false;
-      }
-    }
-  }
-});
+     
       // Initial load of listings
       loadListings();
       filterBtn.click();
