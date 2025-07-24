@@ -1314,13 +1314,7 @@ deleteOpportunity: async function(postId, deleteBtn) {
 },
 
       // Handle opportunity creation
-      handleCreateOpportunity: async function(e) {
-        e.preventDefault();
-        await this.createNewOpportunity();
-      },
-
-      // Handle my enrollments
-      handleMyEnrollments: async function() {
+ handleMyEnrollments: async function() {
         const user = this.auth.currentUser;
         if (!user) {
           this.showToast("Please log in to view your enrollments", "warning");
