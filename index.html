@@ -226,7 +226,12 @@
       border-color: var(--primary);
       box-shadow: 0 0 0 0.25rem rgba(106, 17, 203, 0.25);
     }
-    
+    .badge.bg-success {
+    padding: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
     /* Loading spinner */
     .spinner-container {
       display: flex;
@@ -657,26 +662,25 @@ document.addEventListener("DOMContentLoaded", function() {
   // ======================
 
   // Update UI based on auth state
-  function updateUI(user) {
+function updateUI(user) {
     if (user) {
-      authButtons.classList.add('hide');
-      userControls.classList.remove('hide');
-      postECBtn.textContent = 'Post Opportunity';
-      document.getElementById('showMyPostsBtn').classList.remove('hide');
-      document.getElementById('showMyEnrollmentsBtn').classList.remove('hide');
-      
-      // Load user enrollments
-      loadUserEnrollments(user.uid);
+        authButtons.classList.add('hide');
+        userControls.classList.remove('hide');
+        postECBtn.textContent = 'Post Opportunity';
+        document.getElementById('showMyPostsBtn').classList.remove('hide');
+        document.getElementById('showMyEnrollmentsBtn').classList.remove('hide');
+        loadUserEnrollments(user.uid);
     } else {
-      authButtons.classList.remove('hide');
-      userControls.classList.add('hide');
-      postECBtn.textContent = 'Post Opportunity (Login Required)';
-      document.getElementById('showMyPostsBtn').classList.add('hide');
-      document.getElementById('showMyEnrollmentsBtn').classList.add('hide');
-      currentUserEnrollments = {};
+        authButtons.classList.remove('hide');
+        userControls.classList.add('hide');
+        postECBtn.textContent = 'Post Opportunity (Login Required)';
+        document.getElementById('showMyPostsBtn').classList.add('hide');
+        document.getElementById('showMyEnrollmentsBtn').classList.add('hide');
+        currentUserEnrollments = {};
     }
+    // Always load listings, regardless of auth state
     loadListings(currentFilter);
-  }
+}
 
   // Load user enrollments
   function loadUserEnrollments(userId) {
@@ -832,7 +836,7 @@ document.addEventListener("DOMContentLoaded", function() {
   // ======================
 
   // Filter Listings with updated join button logic
-  function loadListings(filterType = "all") {
+function loadListings(filterType = "all") {
     const fLoc = document.getElementById("filter-location").value;
     const fField = document.getElementById("filter-field").value;
     const user = auth.currentUser;
@@ -847,131 +851,132 @@ document.addEventListener("DOMContentLoaded", function() {
     `;
 
     db.ref("posts").once("value").then(snapshot => {
-      listings.innerHTML = "";
-      let found = false;
-      
-      snapshot.forEach(child => {
-        const post = child.val();
-        const postId = child.key;
+        listings.innerHTML = "";
+        let found = false;
         
-        // Apply filters
-        let showPost = true;
-        if (filterType === "myPosts" && (!user || user.uid !== post.uid)) {
-          showPost = false;
-        }
-        
-        if (showPost && (!fLoc || post.location === fLoc) && (!fField || post.field === fField)) {
-          found = true;
-          
-          const isOwner = user && user.uid === post.uid;
-          const isNew = Date.now() - post.timestamp < 86400000 * 3;
-          const postedDate = new Date(post.timestamp).toLocaleDateString();
-          const isEnrolled = user && currentUserEnrollments[postId];
-          
-          listings.innerHTML += `
-            <div class="col-md-6 col-lg-4">
-              <div class="card h-100 opportunity-card">
-                <div class="opportunity-header">
-                  ${isNew ? '<span class="highlight-badge mb-2">NEW</span>' : ''}
-                  <h5 class="card-title">${post.title}</h5>
-                  <div class="d-flex flex-wrap gap-2 my-2">
-                    <span class="category-badge ${post.field}">${post.field}</span>
-                    <span class="category-badge ${post.type.replace(' ', '')}">${post.type}</span>
-                  </div>
-                  <small class="text-muted">Posted on ${postedDate}</small>
-                </div>
-                <div class="card-body">
-                  <p class="card-text">${post.desc}</p>
-                </div>
-                <div class="card-footer opportunity-footer">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <span class="badge bg-light text-dark me-2">
-                        <i class="bi bi-geo-alt"></i> ${post.location}
-                      </span>
-                      ${post.telegram ? `
-                        <span class="badge bg-light text-dark">
-                          <i class="bi bi-telegram"></i> ${post.telegram}
-                        </span>
-                      ` : ''}
-                    </div>
-                    ${isEnrolled ? `
-                      <span class="badge bg-success">Already Enrolled</span>
-                    ` : `
-                      <button class="btn btn-primary enroll-btn" data-post-id="${postId}">
-                        <i class="bi bi-arrow-right-circle"></i> Join
-                      </button>
-                    `}
-                  </div>
-                  ${isOwner ? `
-                    <div class="d-flex justify-content-between mt-3 pt-3 border-top">
-                      <button class="btn btn-sm btn-info view-enrollments" data-post-id="${postId}">
-                        <i class="bi bi-people-fill"></i> View Participants
-                      </button>
-                      <button class="btn btn-sm btn-danger delete-btn" data-post-id="${postId}">
-                        <i class="bi bi-trash"></i> Delete
-                      </button>
-                    </div>
-                  ` : ''}
-                </div>
-              </div>
-            </div>
-          `;
-        }
-      });
-
-      if (!found) {
-        listings.innerHTML = `
-          <div class="col-12">
-            <div class="text-center py-5">
-              <i class="bi bi-binoculars fs-1 text-muted mb-3"></i>
-              <h4>No opportunities found</h4>
-              <p class="text-muted">Try adjusting your filters or check back later</p>
-              ${!user ? '<button class="btn btn-primary mt-3" onclick="showAuth(\'register\')">Be the first to post!</button>' : ''}
-            </div>
-          </div>
-        `;
-      } else {
-        // Add event listeners to enroll buttons
-        document.querySelectorAll(".enroll-btn").forEach(btn => {
-          btn.addEventListener("click", function() {
-            const postId = this.getAttribute("data-post-id");
-            if (!auth.currentUser) {
-              showToast("Please register or log in to enroll", false);
-              showAuth('login');
-              return;
+        snapshot.forEach(child => {
+            const post = child.val();
+            const postId = child.key;
+            
+            // Apply filters
+            let showPost = true;
+            if (filterType === "myPosts" && (!user || user.uid !== post.uid)) {
+                showPost = false;
             }
-            document.getElementById("enrollPostId").value = postId;
-            new bootstrap.Modal(document.getElementById("enrollModal")).show();
-          });
+            
+            if (showPost && (!fLoc || post.location === fLoc) && (!fField || post.field === fField)) {
+                found = true;
+                
+                const isOwner = user && user.uid === post.uid;
+                const isNew = Date.now() - post.timestamp < 86400000 * 3;
+                const postedDate = new Date(post.timestamp).toLocaleDateString();
+                const isEnrolled = user && currentUserEnrollments[postId];
+                
+                listings.innerHTML += `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 opportunity-card">
+                        <div class="opportunity-header">
+                        ${isNew ? '<span class="highlight-badge mb-2">NEW</span>' : ''}
+                        <h5 class="card-title">${post.title}</h5>
+                        <div class="d-flex flex-wrap gap-2 my-2">
+                            <span class="category-badge ${post.field}">${post.field}</span>
+                            <span class="category-badge ${post.type.replace(' ', '')}">${post.type}</span>
+                        </div>
+                        <small class="text-muted">Posted on ${postedDate}</small>
+                        </div>
+                        <div class="card-body">
+                        <p class="card-text">${post.desc}</p>
+                        </div>
+                        <div class="card-footer opportunity-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                            <span class="badge bg-light text-dark me-2">
+                                <i class="bi bi-geo-alt"></i> ${post.location}
+                            </span>
+                            ${post.telegram ? `
+                                <span class="badge bg-light text-dark">
+                                <i class="bi bi-telegram"></i> ${post.telegram}
+                                </span>
+                            ` : ''}
+                            </div>
+                            ${!user ? `
+                            <button class="btn btn-outline-primary" onclick="showAuth('login')">
+                                <i class="bi bi-box-arrow-in-right"></i> Login to Join
+                            </button>
+                            ` : isEnrolled ? `
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-circle"></i> Enrolled
+                            </span>
+                            ` : `
+                            <button class="btn btn-primary enroll-btn" data-post-id="${postId}">
+                                <i class="bi bi-arrow-right-circle"></i> Join
+                            </button>
+                            `}
+                        </div>
+                        ${isOwner ? `
+                            <div class="d-flex justify-content-between mt-3 pt-3 border-top">
+                            <button class="btn btn-sm btn-info view-enrollments" data-post-id="${postId}">
+                                <i class="bi bi-people-fill"></i> View Participants
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-btn" data-post-id="${postId}">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                            </div>
+                        ` : ''}
+                        </div>
+                    </div>
+                </div>
+                `;
+            }
         });
 
-        // Add event listeners to view enrollments buttons
-        document.querySelectorAll(".view-enrollments").forEach(btn => {
-          btn.addEventListener("click", function() {
-            const postId = this.getAttribute("data-post-id");
-            viewEnrollments(postId);
-          });
-        });
+        if (!found) {
+            listings.innerHTML = `
+            <div class="col-12">
+                <div class="text-center py-5">
+                <i class="bi bi-binoculars fs-1 text-muted mb-3"></i>
+                <h4>No opportunities found</h4>
+                <p class="text-muted">Try adjusting your filters or check back later</p>
+                ${!user ? '<button class="btn btn-primary mt-3" onclick="showAuth(\'register\')">Be the first to post!</button>' : ''}
+                </div>
+            </div>
+            `;
+        } else {
+            // Add event listeners to enroll buttons
+            document.querySelectorAll(".enroll-btn").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    const postId = this.getAttribute("data-post-id");
+                    document.getElementById("enrollPostId").value = postId;
+                    new bootstrap.Modal(document.getElementById("enrollModal")).show();
+                });
+            });
 
-        // Add event listeners to delete buttons
-        document.querySelectorAll(".delete-btn").forEach(btn => {
-          btn.addEventListener("click", function() {
-            const postId = this.getAttribute("data-post-id");
-            deleteOpportunity(postId, this);
-          });
-        });
-      }
+            // Add event listeners to view enrollments buttons
+            document.querySelectorAll(".view-enrollments").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    const postId = this.getAttribute("data-post-id");
+                    viewEnrollments(postId);
+                });
+            });
+
+            // Add event listeners to delete buttons
+            document.querySelectorAll(".delete-btn").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    const postId = this.getAttribute("data-post-id");
+                    deleteOpportunity(postId, this);
+                });
+            });
+        }
     }).catch(error => {
-      listings.innerHTML = `
+        listings.innerHTML = `
         <div class="col-12">
-          <div class="alert alert-danger">
+            <div class="alert alert-danger">
             <i class="bi bi-exclamation-triangle-fill"></i> Error loading opportunities: ${error.message}
-          </div>
+            </div>
         </div>
-      `;
+        `;
     });
-  }
+}
 
   // ======================
   // EVENT LISTENERS
