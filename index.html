@@ -1367,71 +1367,50 @@ deleteOpportunity: async function(postId, deleteBtn) {
           let found = false;
           
           postsSnapshot.forEach(postChild => {
-            const post = postChild.val();
-            const postId = postChild.key;
-            
-            if (enrolledPostIds.includes(postId)) {
-              found = true;
-              const postedDate = new Date(post.timestamp).toLocaleDateString();
-              
-              document.getElementById("listings").innerHTML += `
-                <div class="col-md-6 col-lg-4">
-                  <div class="card h-100 opportunity-card">
-                    <div class="opportunity-header">
-                      <h5 class="card-title">${post.title}</h5>
-                      <div class="d-flex flex-wrap gap-2 my-2">
-                        <span class="category-badge ${post.field}">${post.field}</span>
-                        <span class="category-badge ${post.type.replace(' ', '')}">${post.type}</span>
-                      </div>
-                      <small class="text-muted">Posted on ${postedDate}</small>
-                    </div>
-                    <div class="card-body">
-                      <p class="card-text">${post.desc}</p>
-                    </div>
-                    <div class="card-footer opportunity-footer">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <span class="badge bg-light text-dark me-2">
-                            <i class="bi bi-geo-alt"></i> ${post.location}
-                          </span>
-                          ${post.telegram ? `
-                            <span class="badge bg-light text-dark">
-                              <i class="bi bi-telegram"></i> ${post.telegram}
-                            </span>
-                          ` : ''}
-                        </div>
-                        <button class="btn btn-outline-primary" data-post-id="${postId}">
-                          <i class="bi bi-eye"></i> View Details
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+    const post = postChild.val();
+    const postId = postChild.key;
+    
+    if (enrolledPostIds.includes(postId)) {
+      found = true;
+      const postedDate = new Date(post.timestamp).toLocaleDateString();
+      
+      document.getElementById("listings").innerHTML += `
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 opportunity-card">
+            <!-- ... other card content ... -->
+            <div class="card-footer opportunity-footer">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <span class="badge bg-light text-dark me-2">
+                    <i class="bi bi-geo-alt"></i> ${post.location}
+                  </span>
+                  ${post.telegram ? `
+                    <span class="badge bg-light text-dark">
+                      <i class="bi bi-telegram"></i> ${post.telegram}
+                    </span>
+                  ` : ''}
                 </div>
-              `;
-            }
-          });
-          
-          if (!found) {
-            document.getElementById("listings").innerHTML = `
-              <div class="col-12">
-                <div class="text-center py-5">
-                  <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
-                  <h4>No enrollments found</h4>
-                  <p class="text-muted">You haven't enrolled in any opportunities yet</p>
-                </div>
-              </div>
-            `;
-          }
-        } catch (error) {
-          document.getElementById("listings").innerHTML = `
-            <div class="col-12">
-              <div class="alert alert-danger">
-                <i class="bi bi-exclamation-triangle-fill"></i> Error loading enrollments: ${error.message}
+                <button class="btn btn-outline-primary view-details-btn" 
+                        data-post-id="${postId}">
+                  <i class="bi bi-eye"></i> View Details
+                </button>
               </div>
             </div>
-          `;
-        }
-      },
+          </div>
+        </div>
+      `;
+    }
+  });
+
+  // Add event listeners to the new buttons
+  document.querySelectorAll(".view-details-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const postId = btn.getAttribute("data-post-id");
+      this.showOpportunityDetails(postId);
+    });
+  });
+},
 
       // Handle enroll form submission
       handleEnrollSubmit: async function(e) {
