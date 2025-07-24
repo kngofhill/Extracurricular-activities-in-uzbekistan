@@ -304,7 +304,7 @@
         </button>
       </div>
     </div>
-    <!-- Auth Buttons (for logged out state) -->
+   <!-- Auth Buttons (for logged out state) -->
 <div id="authButtons" class="d-flex justify-content-center gap-2 my-4" style="display: none;">
   <button class="btn btn-outline-primary" onclick="app.showAuth('login')">
     <i class="bi bi-box-arrow-in-right"></i> Log In
@@ -320,7 +320,6 @@
     <i class="bi bi-box-arrow-left"></i> Log Out
   </button>
 </div>
-
     <!-- Auth Modal -->
     <div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
@@ -742,45 +741,43 @@
       },
 
       // Update UI based on auth state
- updateUI: function(user) {
+updateUI: function(user) {
   const authButtons = document.getElementById('authButtons');
   const userControls = document.getElementById('userControls');
+  
+  // Reset both elements first
+  authButtons.style.display = 'none';
+  userControls.style.display = 'none';
+  
+  if (user) {
+    // User is logged in - show logout button
+    userControls.style.display = 'flex';
+  } else {
+    // User is logged out - show login/register buttons
+    authButtons.style.display = 'flex';
+  }
+  
+  // Update other UI elements as needed
   const postECBtn = document.getElementById('postECBtn');
   const showMyPostsBtn = document.getElementById('showMyPostsBtn');
   const showMyEnrollmentsBtn = document.getElementById('showMyEnrollmentsBtn');
   
   if (user) {
-    // User is logged in - show user controls and hide auth buttons
-    authButtons.style.display = 'none';
-    userControls.style.display = 'flex';
     postECBtn.textContent = 'Post Opportunity';
     postECBtn.classList.remove('btn-outline-light');
     postECBtn.classList.add('btn-light');
-    
-    // Show these buttons only if user is logged in
     showMyPostsBtn.style.display = 'block';
     showMyEnrollmentsBtn.style.display = 'block';
-    
-    // Close any open auth modals
-    const authModal = bootstrap.Modal.getInstance(document.getElementById("authModal"));
-    if (authModal) authModal.hide();
   } else {
-    // User is logged out - show auth buttons and hide user controls
-    authButtons.style.display = 'flex';
-    userControls.style.display = 'none';
     postECBtn.textContent = 'Post Opportunity (Login Required)';
     postECBtn.classList.remove('btn-light');
     postECBtn.classList.add('btn-outline-light');
-    
-    // Hide these buttons when logged out
     showMyPostsBtn.style.display = 'none';
     showMyEnrollmentsBtn.style.display = 'none';
-    
-    // Reset filter to 'all' when logging out
     this.currentFilter = "all";
   }
   
-  // Refresh the listings view
+  // Refresh listings
   this.loadListings(this.currentFilter);
 },
 
