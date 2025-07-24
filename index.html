@@ -921,40 +921,54 @@
       },
 
       // Delete opportunity
-      deleteOpportunity: async function(postId, deleteBtn) {
-        const user = this.auth.currentUser;
-        
-        if (!user) {
-          this.showToast("Please log in to delete posts", "error");
-          return;
-        }
+deleteOpportunity: async function(postId, deleteBtn) {
+    const user = this.auth.currentUser;
 
-        if (!confirm("Are you sure you want to delete this opportunity? This cannot be undone.")) {
-          return;
-        }
+    if (!user) {
+        this.showToast("Please log in to delete posts", "error");
+        return;
+    }
 
+    if (!confirm("Are you sure you want to delete this opportunity? This cannot be undone.")) {
+        return;
+    }
+
+    // Show loading state
+    const originalHTML = deleteBtn.innerHTML;
+    deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Deleting...';
+    deleteBtn.disabled = true;
+
+    try {
+        // --- STEP 1: Attempt to delete the post itself ---
+        await this.db.ref(`posts/${postId}`).remove();
+
+        // If post deletion succeeds, immediately show success and update UI
+        this.showToast("Opportunity deleted successfully!", "success");
+        deleteBtn.closest('.col-md-6').remove(); // Remove from UI after successful post deletion
+        this.loadListings(this.currentFilter); // Reload listings to ensure UI consistency
+
+        // --- STEP 2: Attempt to delete enrollments (handle errors for this separately) ---
         try {
-          // Show loading state
-          const originalHTML = deleteBtn.innerHTML;
-          deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Deleting...';
-          deleteBtn.disabled = true;
-
-          // Delete the post and its enrollments
-          await Promise.all([
-            this.db.ref(`posts/${postId}`).remove(),
-            this.db.ref(`enrollments/${postId}`).remove()
-          ]);
-          
-          // Remove from UI
-          deleteBtn.closest('.col-md-6').remove();
-          this.showToast("Opportunity deleted successfully", "success");
-        } catch (error) {
-          console.error("Delete error:", error);
-          this.showToast("Delete failed: " + error.message, "error");
-          deleteBtn.innerHTML = originalHTML;
-          deleteBtn.disabled = false;
+            await this.db.ref(`enrollments/${postId}`).remove();
+            // console.log("Enrollments deleted successfully for post:", postId); // Optional: log success
+        } catch (enrollmentError) {
+            console.warn("Warning: Could not delete enrollments for post:", postId, enrollmentError);
+            // You can choose to show a less critical toast for this if needed, e.g.:
+            // this.showToast("Note: Enrollments could not be fully deleted. Please contact support if this persists.", "warning");
         }
-      },
+
+    } catch (postDeleteError) { // This catch block only triggers if the POST deletion itself failed
+        console.error("Delete failed for post:", postId, postDeleteError);
+        this.showToast("Delete failed for post: " + postDeleteError.message, "error");
+        // Only reset button state if the primary post deletion failed
+        deleteBtn.innerHTML = originalHTML;
+        deleteBtn.disabled = false;
+    } finally {
+        // If the post was deleted successfully, the element is already removed from UI,
+        // so no need to reset button state on a removed element.
+        // If post deletion failed, the button state is reset in the catch block.
+    }
+},
 
       // Load listings with filters
       loadListings: async function(filterType = "all") {
