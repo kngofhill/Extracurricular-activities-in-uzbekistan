@@ -658,22 +658,26 @@
       currentFilter: "all", // 'all', 'myPosts', 'myEnrollments'
 
       // Initialize the application
-    init: function() {
-  // Initialize Firebase
+  init: function() {
   firebase.initializeApp(this.config);
   this.auth = firebase.auth();
   this.db = firebase.database();
 
+  // Debug: Verify Firebase initialization
+  console.log("Firebase initialized:", firebase.app().name); 
+
+  // Set up auth state listener with proper binding
+  this.auth.onAuthStateChanged((user) => {
+    console.log("Auth state changed. User:", user); // Debug log
+    this.updateUI(user);
+  });
+
   // Set up event listeners
   this.setupEventListeners();
 
-  // Set up auth state listener - this will call updateUI whenever auth state changes
-  this.auth.onAuthStateChanged(user => this.updateUI(user));
-
-  // Initial load of listings
+  // Initial load
   this.loadListings();
 },
-
       // Set up all event listeners
       setupEventListeners: function() {
         // Toggle password visibility
@@ -741,44 +745,54 @@
       },
 
       // Update UI based on auth state
+// Update your updateUI function
 updateUI: function(user) {
-  const authButtons = document.getElementById('authButtons');
-  const userControls = document.getElementById('userControls');
+  console.log("updateUI called with user:", user); // Debug log
   
-  // Reset both elements first
+  // Get elements safely
+  const getElement = (id) => {
+    const el = document.getElementById(id);
+    if (!el) console.error("Element not found:", id);
+    return el;
+  };
+
+  const authButtons = getElement('authButtons');
+  const userControls = getElement('userControls');
+  const postECBtn = getElement('postECBtn');
+  const showMyPostsBtn = getElement('showMyPostsBtn');
+  const showMyEnrollmentsBtn = getElement('showMyEnrollmentsBtn');
+
+  // Verify elements exist before manipulation
+  if (!authButtons || !userControls || !postECBtn) {
+    console.error("Critical elements missing!");
+    return;
+  }
+
+  // Reset all auth-related elements first
   authButtons.style.display = 'none';
   userControls.style.display = 'none';
   
   if (user) {
-    // User is logged in - show logout button
+    console.log("User logged in - updating UI");
     userControls.style.display = 'flex';
-  } else {
-    // User is logged out - show login/register buttons
-    authButtons.style.display = 'flex';
-  }
-  
-  // Update other UI elements as needed
-  const postECBtn = document.getElementById('postECBtn');
-  const showMyPostsBtn = document.getElementById('showMyPostsBtn');
-  const showMyEnrollmentsBtn = document.getElementById('showMyEnrollmentsBtn');
-  
-  if (user) {
     postECBtn.textContent = 'Post Opportunity';
-    postECBtn.classList.remove('btn-outline-light');
-    postECBtn.classList.add('btn-light');
-    showMyPostsBtn.style.display = 'block';
-    showMyEnrollmentsBtn.style.display = 'block';
+    postECBtn.classList.replace('btn-outline-light', 'btn-light');
+    
+    if (showMyPostsBtn) showMyPostsBtn.style.display = 'block';
+    if (showMyEnrollmentsBtn) showMyEnrollmentsBtn.style.display = 'block';
   } else {
+    console.log("User logged out - updating UI");
+    authButtons.style.display = 'flex';
     postECBtn.textContent = 'Post Opportunity (Login Required)';
-    postECBtn.classList.remove('btn-light');
-    postECBtn.classList.add('btn-outline-light');
-    showMyPostsBtn.style.display = 'none';
-    showMyEnrollmentsBtn.style.display = 'none';
+    postECBtn.classList.replace('btn-light', 'btn-outline-light');
+    
+    if (showMyPostsBtn) showMyPostsBtn.style.display = 'none';
+    if (showMyEnrollmentsBtn) showMyEnrollmentsBtn.style.display = 'none';
     this.currentFilter = "all";
   }
   
-  // Refresh listings
-  this.loadListings(this.currentFilter);
+  // Force UI update
+  setTimeout(() => this.loadListings(this.currentFilter), 0);
 },
 
       // Show toast notification
