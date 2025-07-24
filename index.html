@@ -304,9 +304,8 @@
         </button>
       </div>
     </div>
-    
-<!-- Auth Buttons (for logged out state) -->
-<div id="authButtons" class="d-flex justify-content-center gap-2 my-4">
+    <!-- Auth Buttons (for logged out state) -->
+<div id="authButtons" class="d-flex justify-content-center gap-2 my-4" style="display: none;">
   <button class="btn btn-outline-primary" onclick="app.showAuth('login')">
     <i class="bi bi-box-arrow-in-right"></i> Log In
   </button>
@@ -750,20 +749,15 @@
   const showMyPostsBtn = document.getElementById('showMyPostsBtn');
   const showMyEnrollmentsBtn = document.getElementById('showMyEnrollmentsBtn');
   
-  // Reset all elements to default state first
-  authButtons.style.display = 'none';
-  userControls.style.display = 'none';
-  showMyPostsBtn.style.display = 'none';
-  showMyEnrollmentsBtn.style.display = 'none';
-  
   if (user) {
-    // User is logged in - show user controls
+    // User is logged in - show user controls and hide auth buttons
+    authButtons.style.display = 'none';
     userControls.style.display = 'flex';
     postECBtn.textContent = 'Post Opportunity';
     postECBtn.classList.remove('btn-outline-light');
     postECBtn.classList.add('btn-light');
     
-    // Only show these buttons if they're relevant
+    // Show these buttons only if user is logged in
     showMyPostsBtn.style.display = 'block';
     showMyEnrollmentsBtn.style.display = 'block';
     
@@ -771,24 +765,24 @@
     const authModal = bootstrap.Modal.getInstance(document.getElementById("authModal"));
     if (authModal) authModal.hide();
   } else {
-    // User is logged out - show auth buttons
+    // User is logged out - show auth buttons and hide user controls
     authButtons.style.display = 'flex';
+    userControls.style.display = 'none';
     postECBtn.textContent = 'Post Opportunity (Login Required)';
     postECBtn.classList.remove('btn-light');
     postECBtn.classList.add('btn-outline-light');
+    
+    // Hide these buttons when logged out
+    showMyPostsBtn.style.display = 'none';
+    showMyEnrollmentsBtn.style.display = 'none';
     
     // Reset filter to 'all' when logging out
     this.currentFilter = "all";
   }
   
-  // Force a reflow to ensure display changes are applied
-  void authButtons.offsetHeight;
-  void userControls.offsetHeight;
-  
-  // Refresh the listings view (now handles both logged-in and logged-out states)
+  // Refresh the listings view
   this.loadListings(this.currentFilter);
 },
-
 
       // Show toast notification
       showToast: function(message, type = "info") {
