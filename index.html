@@ -618,7 +618,7 @@
     </div>
   </div>
 
- <script>
+<script>
 document.addEventListener("DOMContentLoaded", function() {
   // Firebase Configuration and Initialization
   const firebaseConfig = {
@@ -626,7 +626,7 @@ document.addEventListener("DOMContentLoaded", function() {
     authDomain: "extracurricularsuzbekistan.firebaseapp.com",
     databaseURL: "https://extracurricularsuzbekistan-default-rtdb.firebaseio.com",
     projectId: "extracurricularsuzbekistan",
-    storageBucket: "extracurricularsuzbekistan.firebasestorage.app",
+    storageBucket: "extracurricularsuzbekistan.appspot.com",
     messagingSenderId: "555521664728",
     appId: "1:555521664728:web:bf72cb8384be98ff7b99ad",
     measurementId: "G-Z53076ZBCJ"
@@ -638,113 +638,89 @@ document.addEventListener("DOMContentLoaded", function() {
   const db = firebase.database();
 
   // DOM Elements
+  const authButtons = document.getElementById("authButtons");
+  const userControls = document.getElementById("userControls");
   const loginForm = document.getElementById("loginForm");
   const registerForm = document.getElementById("registerForm");
   const passwordResetForm = document.getElementById("passwordResetForm");
   const logoutBtn = document.getElementById("logoutBtn");
   const postECBtn = document.getElementById("postECBtn");
   const createOpportunityForm = document.getElementById("createOpportunityForm");
-  const submitBtn = document.getElementById("submitBtn");
-  const cancelBtn = document.getElementById("cancelBtn");
-  const filterBtn = document.getElementById("filterBtn");
-  const showAllBtn = document.getElementById("showAllBtn");
-  const showMyPostsBtn = document.getElementById("showMyPostsBtn");
-  const showMyEnrollmentsBtn = document.getElementById("showMyEnrollmentsBtn");
   const listings = document.getElementById("listings");
-  const toggleLoginPassword = document.getElementById("toggleLoginPassword");
-  const toggleRegisterPassword = document.getElementById("toggleRegisterPassword");
 
   // Current filter state
-  let currentFilter = "all"; // 'all', 'myPosts', 'myEnrollments'
+  let currentFilter = "all";
+  let currentUserEnrollments = {};
 
   // ======================
-  // HELPER FUNCTIONS
+  // AUTHENTICATION FUNCTIONS
   // ======================
-
-  // Show Auth Modal Function
-  window.showAuth = function(type) {
-    if (type === "login") {
-      loginForm.classList.remove("hide");
-      registerForm.classList.add("hide");
-      document.getElementById("authModalLabel").innerText = "Log In";
-    } else {
-      loginForm.classList.add("hide");
-      registerForm.classList.remove("hide");
-      document.getElementById("authModalLabel").innerText = "Register";
-    }
-    new bootstrap.Modal(document.getElementById("authModal")).show();
-  };
-
-  // Show Password Reset Modal
-  window.showPasswordReset = function() {
-    bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
-    new bootstrap.Modal(document.getElementById("passwordResetModal")).show();
-  };
-
-  // Open Auth From Prompt
-  window.openAuthFromPrompt = function(type) {
-    bootstrap.Modal.getInstance(document.getElementById("loginPromptModal")).hide();
-    showAuth(type);
-  };
 
   // Update UI based on auth state
   function updateUI(user) {
     if (user) {
-      document.getElementById('authButtons').classList.add('hide');
-      document.getElementById('userControls').classList.remove('hide');
-      document.getElementById('postECBtn').textContent = 'Post Opportunity';
+      authButtons.classList.add('hide');
+      userControls.classList.remove('hide');
+      postECBtn.textContent = 'Post Opportunity';
       document.getElementById('showMyPostsBtn').classList.remove('hide');
       document.getElementById('showMyEnrollmentsBtn').classList.remove('hide');
+      
+      // Load user enrollments
+      loadUserEnrollments(user.uid);
     } else {
-      document.getElementById('authButtons').classList.remove('hide');
-      document.getElementById('userControls').classList.add('hide');
-      document.getElementById('postECBtn').textContent = 'Post Opportunity (Login Required)';
+      authButtons.classList.remove('hide');
+      userControls.classList.add('hide');
+      postECBtn.textContent = 'Post Opportunity (Login Required)';
       document.getElementById('showMyPostsBtn').classList.add('hide');
       document.getElementById('showMyEnrollmentsBtn').classList.add('hide');
+      currentUserEnrollments = {};
     }
     loadListings(currentFilter);
   }
 
-  // Show Create Form Function
-  function showCreateForm() {
-    const user = auth.currentUser;
-    if (!user) {
-      new bootstrap.Modal(document.getElementById("loginPromptModal")).show();
-      return;
-    }
-    const section = document.getElementById("createListingSection");
-    section.style.display = "block";
-    section.scrollIntoView({ behavior: "smooth" });
-    document.getElementById("title").focus();
+  // Load user enrollments
+  function loadUserEnrollments(userId) {
+    db.ref("enrollments").orderByChild(userId).once("value").then(snapshot => {
+      currentUserEnrollments = {};
+      snapshot.forEach(postSnapshot => {
+        if (postSnapshot.hasChild(userId)) {
+          currentUserEnrollments[postSnapshot.key] = true;
+        }
+      });
+      loadListings(currentFilter);
+    });
   }
 
-  // Hide Create Form Function
-  function hideCreateForm() {
-    document.getElementById("createListingSection").style.display = "none";
-    document.getElementById("createOpportunityForm").reset();
-  }
-
-  // Show Toast Notification
+  // Show Toast Notification (modified to not show success for errors)
   function showToast(message, isSuccess = true) {
     const toastEl = document.getElementById("postToast");
     const toastHeader = toastEl.querySelector(".toast-header");
     const toastBody = toastEl.querySelector(".toast-body");
     
+    // Only modify header if it's a success message
     if (isSuccess) {
       toastHeader.className = "toast-header bg-success text-white";
+      toastHeader.querySelector("strong").textContent = "Success";
     } else {
       toastHeader.className = "toast-header bg-danger text-white";
+      toastHeader.querySelector("strong").textContent = "Error";
     }
     
     toastBody.textContent = message;
     new bootstrap.Toast(toastEl).show();
   }
 
+  // ======================
+  // FORM VALIDATION & SUBMISSION
+  // ======================
+
   // Validate Form Function
-function validateForm() {
+  function validateForm() {
+    let isValid = true;
+    
     // Clear previous invalid states
     document.querySelectorAll('.is-invalid').forEach(el => {
-        el.classList.remove('is-invalid');
+      el.classList.remove('is-invalid');
     });
 
     const title = document.getElementById("title").value.trim();
@@ -753,148 +729,109 @@ function validateForm() {
     const field = document.getElementById("field").value;
     const type = document.getElementById("type").value;
     
-    let isValid = true;
-    let errorMessage = "";
-
     if (!title) {
-        document.getElementById("title").classList.add("is-invalid");
-        isValid = false;
-        errorMessage = "Please enter a title";
-    } else if (!desc) {
-        document.getElementById("desc").classList.add("is-invalid");
-        isValid = false;
-        errorMessage = "Please enter a description";
-    } else if (desc.length < 50) {
-        document.getElementById("desc").classList.add("is-invalid");
-        isValid = false;
-        errorMessage = "Description must be at least 50 characters";
-    } else if (!loc || loc === "Select location") {
-        document.getElementById("location").classList.add("is-invalid");
-        isValid = false;
-        errorMessage = "Please select a location";
-    } else if (!field || field === "Select field") {
-        document.getElementById("field").classList.add("is-invalid");
-        isValid = false;
-        errorMessage = "Please select a field";
-    } else if (!type || type === "Select type") {
-        document.getElementById("type").classList.add("is-invalid");
-        isValid = false;
-        errorMessage = "Please select a type";
+      document.getElementById("title").classList.add("is-invalid");
+      isValid = false;
     }
-
+    
+    if (!desc) {
+      document.getElementById("desc").classList.add("is-invalid");
+      isValid = false;
+    } else if (desc.length < 50) {
+      document.getElementById("desc").classList.add("is-invalid");
+      isValid = false;
+    }
+    
+    if (!loc || loc === "Select location") {
+      document.getElementById("location").classList.add("is-invalid");
+      isValid = false;
+    }
+    
+    if (!field || field === "Select field") {
+      document.getElementById("field").classList.add("is-invalid");
+      isValid = false;
+    }
+    
+    if (!type || type === "Select type") {
+      document.getElementById("type").classList.add("is-invalid");
+      isValid = false;
+    }
+    
     if (!isValid) {
-        showToast(errorMessage, false);
-        return false;
+      showToast("Please fill in all required fields correctly", false);
+      return false;
     }
     
     return true;
-}
-  // ======================
-  // CORE FUNCTIONALITY
-  // ======================
+  }
 
   // Create New Opportunity Function
-async function createNewOpportunity() {
-    // Validate first - exit immediately if validation fails
-    if (!validateForm()) {
-        return false;
-    }
+  async function createNewOpportunity() {
+    if (!validateForm()) return false;
     
     const user = auth.currentUser;
     if (!user) {
-        showToast("Please log in to post opportunities", false);
-        return false;
-    }
-
-    try {
-        // Show loading state
-        document.getElementById("submitBtnText").textContent = "Posting...";
-        document.getElementById("submitSpinner").classList.remove("hide");
-        submitBtn.disabled = true;
-        
-        // Get form values
-        const title = document.getElementById("title").value.trim();
-        const desc = document.getElementById("desc").value.trim();
-        const loc = document.getElementById("location").value;
-        const field = document.getElementById("field").value;
-        const type = document.getElementById("type").value;
-        const telegram = document.getElementById("telegram").value.trim();
-
-        // Prepare data object
-        const opportunityData = {
-            title,
-            desc,
-            location: loc,
-            field,
-            type,
-            telegram: telegram || null,
-            uid: user.uid,
-            userEmail: user.email,
-            timestamp: Date.now()
-        };
-
-        // Save to Firebase
-        await db.ref("posts").push(opportunityData);
-        
-        // Only show success after successful Firebase write
-        showToast("Opportunity posted successfully!");
-        
-        // Reset form and hide it
-        hideCreateForm();
-        
-        // Refresh listings
-        loadListings(currentFilter);
-        
-        return true;
-    } catch (error) {
-        console.error("Error posting opportunity:", error);
-        showToast("Error posting opportunity: " + error.message, false);
-        return false;
-    } finally {
-        // Reset button state
-        document.getElementById("submitBtnText").textContent = "Post Opportunity";
-        document.getElementById("submitSpinner").classList.add("hide");
-        submitBtn.disabled = false;
-    }
-}
-
-  // Delete Opportunity Function
-  async function deleteOpportunity(postId, deleteBtn) {
-    const user = auth.currentUser;
-    
-    if (!user) {
-      showToast("Please log in to delete posts", false);
-      return;
-    }
-
-    if (!confirm("Are you sure you want to delete this opportunity? This cannot be undone.")) {
-      return;
+      showToast("Please log in to post opportunities", false);
+      return false;
     }
 
     try {
       // Show loading state
-      const originalHTML = deleteBtn.innerHTML;
-      deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Deleting...';
-      deleteBtn.disabled = true;
-
-      // Delete the post and its enrollments
-      await Promise.all([
-        db.ref(`posts/${postId}`).remove(),
-        db.ref(`enrollments/${postId}`).remove()
-      ]);
+      document.getElementById("submitBtnText").textContent = "Posting...";
+      document.getElementById("submitSpinner").classList.remove("hide");
+      submitBtn.disabled = true;
       
-      // Remove from UI
-      deleteBtn.closest('.col-md-6').remove();
-      showToast("Opportunity deleted successfully");
+      // Get form values
+      const title = document.getElementById("title").value.trim();
+      const desc = document.getElementById("desc").value.trim();
+      const loc = document.getElementById("location").value;
+      const field = document.getElementById("field").value;
+      const type = document.getElementById("type").value;
+      const telegram = document.getElementById("telegram").value.trim();
+
+      // Prepare data object
+      const opportunityData = {
+        title,
+        desc,
+        location: loc,
+        field,
+        type,
+        telegram: telegram || null,
+        uid: user.uid,
+        userEmail: user.email,
+        timestamp: Date.now()
+      };
+
+      // Save to Firebase
+      await db.ref("posts").push(opportunityData);
+      
+      // Show success message only after successful post
+      showToast("Opportunity posted successfully!");
+      
+      // Reset form and hide it
+      hideCreateForm();
+      
+      // Refresh listings
+      loadListings(currentFilter);
+      
+      return true;
     } catch (error) {
-      console.error("Delete error:", error);
-      showToast("Delete failed: " + error.message, false);
-      deleteBtn.innerHTML = originalHTML;
-      deleteBtn.disabled = false;
+      console.error("Error posting opportunity:", error);
+      showToast("Error posting opportunity: " + error.message, false);
+      return false;
+    } finally {
+      // Reset button state
+      document.getElementById("submitBtnText").textContent = "Post Opportunity";
+      document.getElementById("submitSpinner").classList.add("hide");
+      submitBtn.disabled = false;
     }
   }
 
-  // Filter Listings
+  // ======================
+  // LISTINGS & ENROLLMENTS
+  // ======================
+
+  // Filter Listings with updated join button logic
   function loadListings(filterType = "all") {
     const fLoc = document.getElementById("filter-location").value;
     const fField = document.getElementById("filter-field").value;
@@ -927,8 +864,9 @@ async function createNewOpportunity() {
           found = true;
           
           const isOwner = user && user.uid === post.uid;
-          const isNew = Date.now() - post.timestamp < 86400000 * 3; // 3 days old
+          const isNew = Date.now() - post.timestamp < 86400000 * 3;
           const postedDate = new Date(post.timestamp).toLocaleDateString();
+          const isEnrolled = user && currentUserEnrollments[postId];
           
           listings.innerHTML += `
             <div class="col-md-6 col-lg-4">
@@ -957,9 +895,13 @@ async function createNewOpportunity() {
                         </span>
                       ` : ''}
                     </div>
-                    <button class="btn btn-primary enroll-btn" data-post-id="${postId}">
-                      <i class="bi bi-arrow-right-circle"></i> Join
-                    </button>
+                    ${isEnrolled ? `
+                      <span class="badge bg-success">Already Enrolled</span>
+                    ` : `
+                      <button class="btn btn-primary enroll-btn" data-post-id="${postId}">
+                        <i class="bi bi-arrow-right-circle"></i> Join
+                      </button>
+                    `}
                   </div>
                   ${isOwner ? `
                     <div class="d-flex justify-content-between mt-3 pt-3 border-top">
@@ -1031,77 +973,9 @@ async function createNewOpportunity() {
     });
   }
 
-  // View Enrollments
-  function viewEnrollments(postId) {
-    const enrolledUsersList = document.getElementById("enrolledUsersList");
-    enrolledUsersList.innerHTML = `
-      <div class="text-center">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <p>Loading enrollments...</p>
-      </div>
-    `;
-    
-    const modal = new bootstrap.Modal(document.getElementById("viewEnrollmentsModal"));
-    modal.show();
-    
-    db.ref(`enrollments/${postId}`).once("value").then(snapshot => {
-      if (!snapshot.exists() || snapshot.numChildren() === 0) {
-        enrolledUsersList.innerHTML = `
-          <div class="text-center py-4">
-            <i class="bi bi-people fs-1 text-muted"></i>
-            <h5>No enrollments yet</h5>
-            <p class="text-muted">No one has enrolled in this opportunity yet.</p>
-          </div>
-        `;
-        return;
-      }
-      
-      let html = '<div class="list-group">';
-      snapshot.forEach(child => {
-        const enrollment = child.val();
-        html += `
-          <div class="list-group-item">
-            <div class="d-flex w-100 justify-content-between">
-              <h6 class="mb-1">${enrollment.userEmail}</h6>
-              <small>${new Date(enrollment.timestamp).toLocaleString()}</small>
-            </div>
-            <p class="mb-1">Telegram: ${enrollment.telegram || "Not provided"}</p>
-            <small>Phone: ${enrollment.phone || "Not provided"}</small>
-          </div>
-        `;
-      });
-      html += '</div>';
-      enrolledUsersList.innerHTML = html;
-      
-    }).catch(error => {
-      enrolledUsersList.innerHTML = `
-        <div class="alert alert-danger">
-          Error loading enrollments: ${error.message}
-        </div>
-      `;
-    });
-  }
-
   // ======================
   // EVENT LISTENERS
   // ======================
-
-  // Toggle Password Visibility
-  toggleLoginPassword.addEventListener("click", function() {
-    const passwordInput = document.getElementById("loginPassword");
-    const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-    passwordInput.setAttribute("type", type);
-    this.innerHTML = type === "password" ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
-  });
-
-  toggleRegisterPassword.addEventListener("click", function() {
-    const passwordInput = document.getElementById("registerPassword");
-    const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-    passwordInput.setAttribute("type", type);
-    this.innerHTML = type === "password" ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
-  });
 
   // Auth State Listener
   auth.onAuthStateChanged(user => {
@@ -1117,14 +991,13 @@ async function createNewOpportunity() {
     }
   });
 
-  // Form Submissions
+  // Login Form Submission
   loginForm.addEventListener("submit", async function(e) {
     e.preventDefault();
     const email = document.getElementById("loginEmail").value;
     const password = document.getElementById("loginPassword").value;
     
     try {
-      // Show loading state
       document.getElementById("loginBtnText").textContent = "Logging in...";
       document.getElementById("loginSpinner").classList.remove("hide");
       
@@ -1146,19 +1019,18 @@ async function createNewOpportunity() {
       }
       showToast(errorMessage, false);
     } finally {
-      // Reset button state
       document.getElementById("loginBtnText").textContent = "Log In";
       document.getElementById("loginSpinner").classList.add("hide");
     }
   });
 
+  // Register Form Submission
   registerForm.addEventListener("submit", async function(e) {
     e.preventDefault();
     const email = document.getElementById("registerEmail").value;
     const password = document.getElementById("registerPassword").value;
     
     try {
-      // Show loading state
       document.getElementById("registerBtnText").textContent = "Registering...";
       document.getElementById("registerSpinner").classList.remove("hide");
       
@@ -1167,183 +1039,19 @@ async function createNewOpportunity() {
       showToast("Registered successfully!");
       bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
     } catch (error) {
-      showToast("Registration failed: " + error.message, false);
+      let errorMessage = "Registration failed. ";
+      if (error.code === "auth/email-already-in-use") {
+        errorMessage += "Email already in use.";
+      } else if (error.code === "auth/weak-password") {
+        errorMessage += "Password should be at least 6 characters.";
+      } else {
+        errorMessage += error.message;
+      }
+      showToast(errorMessage, false);
     } finally {
-      // Reset button state
       document.getElementById("registerBtnText").textContent = "Register";
       document.getElementById("registerSpinner").classList.add("hide");
     }
-  });
-
-  passwordResetForm.addEventListener("submit", async function(e) {
-    e.preventDefault();
-    const email = document.getElementById("resetEmail").value;
-    
-    try {
-      // Show loading state
-      document.getElementById("resetBtnText").textContent = "Sending...";
-      document.getElementById("resetSpinner").classList.remove("hide");
-      
-      await auth.sendPasswordResetEmail(email);
-      
-      showToast("Password reset link sent to your email");
-      bootstrap.Modal.getInstance(document.getElementById("passwordResetModal")).hide();
-    } catch (error) {
-      showToast("Error sending reset link: " + error.message, false);
-    } finally {
-      // Reset button state
-      document.getElementById("resetBtnText").textContent = "Send Reset Link";
-      document.getElementById("resetSpinner").classList.add("hide");
-    }
-  });
-
-  logoutBtn.addEventListener("click", function() {
-    auth.signOut()
-      .then(() => {
-        currentFilter = "all";
-        showToast("Logged out successfully");
-      })
-      .catch(error => {
-        console.error("Logout error:", error);
-        showToast("Logout failed: " + error.message, false);
-      });
-  });
-
-  postECBtn.addEventListener("click", showCreateForm);
-  cancelBtn.addEventListener("click", hideCreateForm);
-  createOpportunityForm.addEventListener("submit", async function(e) {
-      e.preventDefault(); // This is crucial
-      await createNewOpportunity();
-  });
-
-  // Filter button click handler
-  filterBtn.addEventListener("click", function() {
-    loadListings(currentFilter);
-  });
-
-  // Show All button
-  showAllBtn.addEventListener("click", function() {
-    currentFilter = "all";
-    loadListings();
-  });
-
-  // Show My Posts button
-  showMyPostsBtn.addEventListener("click", function() {
-    currentFilter = "myPosts";
-    loadListings("myPosts");
-  });
-
-  // Show My Enrollments button
-  showMyEnrollmentsBtn.addEventListener("click", function() {
-    const user = auth.currentUser;
-    if (!user) {
-      showToast("Please log in to view your enrollments", false);
-      return;
-    }
-    
-    currentFilter = "myEnrollments";
-    
-    // Show loading state
-    listings.innerHTML = `
-      <div class="col-12 spinner-container">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    `;
-    
-    db.ref("enrollments").once("value").then(snapshot => {
-      const enrolledPostIds = [];
-      snapshot.forEach(postSnapshot => {
-        if (postSnapshot.hasChild(user.uid)) {
-          enrolledPostIds.push(postSnapshot.key);
-        }
-      });
-      
-      if (enrolledPostIds.length === 0) {
-        listings.innerHTML = `
-          <div class="col-12">
-            <div class="text-center py-5">
-              <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
-              <h4>No enrollments yet</h4>
-              <p class="text-muted">You haven't enrolled in any opportunities yet</p>
-            </div>
-          </div>
-        `;
-        return;
-      }
-      
-      // Now fetch and display only the posts the user has enrolled in
-      db.ref("posts").once("value").then(postsSnapshot => {
-        listings.innerHTML = "";
-        let found = false;
-        
-        postsSnapshot.forEach(postChild => {
-          const post = postChild.val();
-          const postId = postChild.key;
-          
-          if (enrolledPostIds.includes(postId)) {
-            found = true;
-            const postedDate = new Date(post.timestamp).toLocaleDateString();
-            
-            listings.innerHTML += `
-              <div class="col-md-6 col-lg-4">
-                <div class="card h-100 opportunity-card">
-                  <div class="opportunity-header">
-                    <h5 class="card-title">${post.title}</h5>
-                    <div class="d-flex flex-wrap gap-2 my-2">
-                      <span class="category-badge ${post.field}">${post.field}</span>
-                      <span class="category-badge ${post.type.replace(' ', '')}">${post.type}</span>
-                    </div>
-                    <small class="text-muted">Posted on ${postedDate}</small>
-                  </div>
-                  <div class="card-body">
-                    <p class="card-text">${post.desc}</p>
-                  </div>
-                  <div class="card-footer opportunity-footer">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                        <span class="badge bg-light text-dark me-2">
-                          <i class="bi bi-geo-alt"></i> ${post.location}
-                        </span>
-                        ${post.telegram ? `
-                          <span class="badge bg-light text-dark">
-                            <i class="bi bi-telegram"></i> ${post.telegram}
-                          </span>
-                        ` : ''}
-                      </div>
-                      <button class="btn btn-outline-primary" data-post-id="${postId}">
-                        <i class="bi bi-eye"></i> View Details
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            `;
-          }
-        });
-        
-        if (!found) {
-          listings.innerHTML = `
-            <div class="col-12">
-              <div class="text-center py-5">
-                <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
-                <h4>No enrollments found</h4>
-                <p class="text-muted">You haven't enrolled in any opportunities yet</p>
-              </div>
-            </div>
-          `;
-        }
-      });
-    }).catch(error => {
-      listings.innerHTML = `
-        <div class="col-12">
-          <div class="alert alert-danger">
-            <i class="bi bi-exclamation-triangle-fill"></i> Error loading enrollments: ${error.message}
-          </div>
-        </div>
-      `;
-    });
   });
 
   // Enroll Form Submission
@@ -1360,7 +1068,6 @@ async function createNewOpportunity() {
     }
 
     try {
-      // Show loading state
       document.getElementById("enrollBtnText").textContent = "Enrolling...";
       document.getElementById("enrollSpinner").classList.remove("hide");
       
@@ -1374,31 +1081,23 @@ async function createNewOpportunity() {
 
       await db.ref(`enrollments/${postId}/${user.uid}`).set(enrollmentData);
       
+      // Update local enrollments and reload
+      currentUserEnrollments[postId] = true;
+      loadListings(currentFilter);
+      
       showToast("Enrollment successful!");
       bootstrap.Modal.getInstance(document.getElementById("enrollModal")).hide();
       document.getElementById("enrollForm").reset();
-      loadListings(currentFilter);
     } catch (error) {
       showToast("Enrollment error: " + error.message, false);
     } finally {
-      // Reset button state
       document.getElementById("enrollBtnText").textContent = "Submit Enrollment";
       document.getElementById("enrollSpinner").classList.add("hide");
     }
   });
 
-  // Get Started Button
-  document.querySelector('.get-started-btn').addEventListener('click', function(e) {
-    e.preventDefault();
-    document.getElementById('listings').scrollIntoView({ 
-      behavior: 'smooth',
-      block: 'start'
-    });
-  });
-
-  // Initial load of listings
+  // Initial load
   loadListings();
-  filterBtn.click();
 });
 </script>
 </body>
