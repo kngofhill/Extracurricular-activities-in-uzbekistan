@@ -660,21 +660,21 @@
       currentFilter: "all", // 'all', 'myPosts', 'myEnrollments'
 
       // Initialize the application
-      init: function() {
-        // Initialize Firebase
-        firebase.initializeApp(this.config);
-        this.auth = firebase.auth();
-        this.db = firebase.database();
+    init: function() {
+  // Initialize Firebase
+  firebase.initializeApp(this.config);
+  this.auth = firebase.auth();
+  this.db = firebase.database();
 
-        // Set up event listeners
-        this.setupEventListeners();
+  // Set up event listeners
+  this.setupEventListeners();
 
-        // Set up auth state listener
-        this.auth.onAuthStateChanged(user => this.updateUI(user));
+  // Set up auth state listener - this will call updateUI whenever auth state changes
+  this.auth.onAuthStateChanged(user => this.updateUI(user));
 
-        // Initial load of listings
-        this.loadListings();
-      },
+  // Initial load of listings
+  this.loadListings();
+},
 
       // Set up all event listeners
       setupEventListeners: function() {
@@ -744,35 +744,39 @@
 
       // Update UI based on auth state
       updateUI: function(user) {
-        const authButtons = document.getElementById('authButtons');
-        const userControls = document.getElementById('userControls');
-        const postECBtn = document.getElementById('postECBtn');
-        const showMyPostsBtn = document.getElementById('showMyPostsBtn');
-        const showMyEnrollmentsBtn = document.getElementById('showMyEnrollmentsBtn');
-        
-        if (user) {
-          authButtons.classList.add('hide');
-          userControls.classList.remove('hide');
-          postECBtn.textContent = 'Post Opportunity';
-          postECBtn.classList.remove('btn-outline-light');
-          postECBtn.classList.add('btn-light');
-          showMyPostsBtn.classList.remove('hide');
-          showMyEnrollmentsBtn.classList.remove('hide');
-          
-          // Close any open auth modals
-          const authModal = bootstrap.Modal.getInstance(document.getElementById("authModal"));
-          if (authModal) authModal.hide();
-        } else {
-          authButtons.classList.remove('hide');
-          userControls.classList.add('hide');
-          postECBtn.textContent = 'Post Opportunity (Login Required)';
-          postECBtn.classList.remove('btn-light');
-          postECBtn.classList.add('btn-outline-light');
-          showMyPostsBtn.classList.add('hide');
-          showMyEnrollmentsBtn.classList.add('hide');
-        }
-        this.loadListings(this.currentFilter);
-      },
+  const authButtons = document.getElementById('authButtons');
+  const userControls = document.getElementById('userControls');
+  const postECBtn = document.getElementById('postECBtn');
+  const showMyPostsBtn = document.getElementById('showMyPostsBtn');
+  const showMyEnrollmentsBtn = document.getElementById('showMyEnrollmentsBtn');
+  
+  if (user) {
+    // User is logged in - hide auth buttons, show user controls
+    authButtons.style.display = 'none';
+    userControls.style.display = 'flex';
+    postECBtn.textContent = 'Post Opportunity';
+    postECBtn.classList.remove('btn-outline-light');
+    postECBtn.classList.add('btn-light');
+    showMyPostsBtn.style.display = 'block';
+    showMyEnrollmentsBtn.style.display = 'block';
+    
+    // Close any open auth modals
+    const authModal = bootstrap.Modal.getInstance(document.getElementById("authModal"));
+    if (authModal) authModal.hide();
+  } else {
+    // User is logged out - show auth buttons, hide user controls
+    authButtons.style.display = 'flex';
+    userControls.style.display = 'none';
+    postECBtn.textContent = 'Post Opportunity (Login Required)';
+    postECBtn.classList.remove('btn-light');
+    postECBtn.classList.add('btn-outline-light');
+    showMyPostsBtn.style.display = 'none';
+    showMyEnrollmentsBtn.style.display = 'none';
+  }
+  
+  // Refresh the listings view
+  this.loadListings(this.currentFilter);
+},
 
       // Show toast notification
       showToast: function(message, type = "info") {
@@ -1268,17 +1272,18 @@ deleteOpportunity: async function(postId, deleteBtn) {
       },
 
       // Handle logout
-      handleLogout: function() {
-        this.auth.signOut()
-          .then(() => {
-            this.currentFilter = "all";
-            this.showToast("Logged out successfully", "success");
-          })
-          .catch(error => {
-            console.error("Logout error:", error);
-            this.showToast("Logout failed: " + error.message, "error");
-          });
-      },
+     handleLogout: function() {
+  this.auth.signOut()
+    .then(() => {
+      this.currentFilter = "all";
+      this.showToast("Logged out successfully", "success");
+      // No need to manually call updateUI here - the auth state listener will handle it
+    })
+    .catch(error => {
+      console.error("Logout error:", error);
+      this.showToast("Logout failed: " + error.message, "error");
+    });
+},
 
       // Handle opportunity creation
       handleCreateOpportunity: async function(e) {
