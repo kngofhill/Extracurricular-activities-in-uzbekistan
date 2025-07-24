@@ -1149,16 +1149,8 @@
 });
 
 // Make these functions available globally for HTML onclick attributes
-window.showAuth = function(type) {
-  document.dispatchEvent(new CustomEvent('showAuth', { detail: type }));
-};
-window.showPasswordReset = function() {
-  document.dispatchEvent(new CustomEvent('showPasswordReset'));
-};
-window.openAuthFromPrompt = function(type) {
-  document.dispatchEvent(new CustomEvent('openAuthFromPrompt', { detail: type }));
-};
-  }
+
+  
 </script>
 
 </body>
