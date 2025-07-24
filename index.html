@@ -304,23 +304,23 @@
         </button>
       </div>
     </div>
+    
+<!-- Auth Buttons (for logged out state) -->
+<div id="authButtons" class="d-flex justify-content-center gap-2 my-4">
+  <button class="btn btn-outline-primary" onclick="app.showAuth('login')">
+    <i class="bi bi-box-arrow-in-right"></i> Log In
+  </button>
+  <button class="btn btn-outline-secondary" onclick="app.showAuth('register')">
+    <i class="bi bi-person-plus"></i> Register
+  </button>
+</div>
 
-    <!-- Auth Buttons (for logged out state) -->
-    <div id="authButtons" class="d-flex justify-content-center gap-2 my-4">
-      <button class="btn btn-outline-primary" onclick="app.showAuth('login')">
-        <i class="bi bi-box-arrow-in-right"></i> Log In
-      </button>
-      <button class="btn btn-outline-secondary" onclick="app.showAuth('register')">
-        <i class="bi bi-person-plus"></i> Register
-      </button>
-    </div>
-
-    <!-- User Controls (for logged in state) -->
-    <div id="userControls" class="d-flex justify-content-end gap-2 my-4 hide">
-      <button id="logoutBtn" class="btn btn-danger">
-        <i class="bi bi-box-arrow-left"></i> Log Out
-      </button>
-    </div>
+<!-- User Controls (for logged in state) -->
+<div id="userControls" class="d-flex justify-content-end gap-2 my-4" style="display: none;">
+  <button id="logoutBtn" class="btn btn-danger">
+    <i class="bi bi-box-arrow-left"></i> Log Out
+  </button>
+</div>
 
     <!-- Auth Modal -->
     <div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
