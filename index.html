@@ -743,16 +743,21 @@
       },
 
       // Update UI based on auth state
-      updateUI: function(user) {
+    updateUI: function(user) {
   const authButtons = document.getElementById('authButtons');
   const userControls = document.getElementById('userControls');
   const postECBtn = document.getElementById('postECBtn');
   const showMyPostsBtn = document.getElementById('showMyPostsBtn');
   const showMyEnrollmentsBtn = document.getElementById('showMyEnrollmentsBtn');
   
+  // First, reset all elements to a known state
+  authButtons.style.display = 'none';
+  userControls.style.display = 'none';
+  showMyPostsBtn.style.display = 'none';
+  showMyEnrollmentsBtn.style.display = 'none';
+  
   if (user) {
-    // User is logged in - hide auth buttons, show user controls
-    authButtons.style.display = 'none';
+    // User is logged in - show user controls
     userControls.style.display = 'flex';
     postECBtn.textContent = 'Post Opportunity';
     postECBtn.classList.remove('btn-outline-light');
@@ -764,15 +769,16 @@
     const authModal = bootstrap.Modal.getInstance(document.getElementById("authModal"));
     if (authModal) authModal.hide();
   } else {
-    // User is logged out - show auth buttons, hide user controls
+    // User is logged out - show auth buttons
     authButtons.style.display = 'flex';
-    userControls.style.display = 'none';
     postECBtn.textContent = 'Post Opportunity (Login Required)';
     postECBtn.classList.remove('btn-light');
     postECBtn.classList.add('btn-outline-light');
-    showMyPostsBtn.style.display = 'none';
-    showMyEnrollmentsBtn.style.display = 'none';
   }
+  
+  // Force a reflow to ensure display changes are applied
+  void authButtons.offsetHeight;
+  void userControls.offsetHeight;
   
   // Refresh the listings view
   this.loadListings(this.currentFilter);
