@@ -1128,17 +1128,25 @@
                             </span>
                           ` : ''}
                         </div>
-                        ${isOwner || isEnrolled ? '' : `
-                          <button class="btn btn-primary enroll-btn" data-post-id="${postId}">
-                            <i class="bi bi-arrow-right-circle"></i> Join
+                        <div class="d-flex gap-2 align-items-center">
+                          ${isOwner || isEnrolled ? '' : `
+                            <button class="btn btn-primary enroll-btn" data-post-id="${postId}">
+                              <i class="bi bi-arrow-right-circle"></i> Join
+                            </button>
+                          `}
+                          ${isEnrolled ? `
+                            <span class="badge bg-success">
+                              <i class="bi bi-check-circle"></i> Enrolled
+                            </span>
+                          ` : ''}
+                          <!-- New View Button (for everyone) -->
+                          <button class="btn btn-outline-primary btn-sm view-details-btn" 
+                                  data-post-id="${postId}">
+                            <i class="bi bi-eye"></i> View
                           </button>
-                        `}
-                        ${isEnrolled ? `
-                          <span class="badge bg-success">
-                            <i class="bi bi-check-circle"></i> Enrolled
-                          </span>
-                        ` : ''}
+                        </div>
                       </div>
+                      
                       ${isOwner ? `
                         <div class="d-flex justify-content-between mt-3 pt-3 border-top">
                           <button class="btn btn-sm btn-info view-enrollments" data-post-id="${postId}">
